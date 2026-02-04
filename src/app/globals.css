@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #09090b;
+  --foreground: #fafafa;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  background-image:
+    radial-gradient(circle at 50% -20%, #4c1d95 0%, transparent 40%),
+    radial-gradient(circle at 0% 100%, #1e1b4b 0%, transparent 30%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+@keyframes pulse-warning {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+
+  70% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
+
+.animate-pulse-warning {
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes slide-up-blocking {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up-blocking {
+  animation: slide-up-blocking 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2 px-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-brand-900/20;
+  }
+
+  .input-field {
+    @apply bg-white/5 border border-white/10 rounded-xl py-2 px-4 focus:outline-none focus:ring-2 focus:ring-brand-500/50 transition-all text-white placeholder-white/40;
+  }
+}
