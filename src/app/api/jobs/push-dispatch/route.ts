@@ -2,12 +2,17 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import webpush from 'web-push';
 
-// Set VAPID keys
-webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT!,
-    process.env.VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
-);
+// Set VAPID keys only if all required environment variables are present
+const vapidSubject = process.env.VAPID_SUBJECT;
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+if (vapidSubject && vapidPublicKey && vapidPrivateKey) {
+    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+} else {
+    console.warn('⚠️ VAPID keys not configured. Push notifications will not work.');
+}
+
 
 export async function POST(req: Request) {
     const authHeader = req.headers.get('authorization');
