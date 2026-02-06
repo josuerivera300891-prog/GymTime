@@ -1,7 +1,22 @@
 import { createClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabaseServer';
 
-export const SUPERADMIN_EMAIL = 'admin@gymtime.com';
+// SuperAdmin emails from environment variable (comma-separated)
+// Default fallback for backward compatibility during transition
+const SUPERADMIN_EMAILS_RAW = process.env.SUPERADMIN_EMAILS || 'admin@gymtime.com';
+export const SUPERADMIN_EMAILS = SUPERADMIN_EMAILS_RAW.split(',').map(e => e.trim().toLowerCase());
+
+/**
+ * Check if an email belongs to a SuperAdmin
+ */
+export function isSuperAdminEmail(email: string | undefined | null): boolean {
+    if (!email) return false;
+    return SUPERADMIN_EMAILS.includes(email.toLowerCase());
+}
+
+// Keep for backward compatibility but mark as deprecated
+/** @deprecated Use isSuperAdminEmail() instead */
+export const SUPERADMIN_EMAIL = SUPERADMIN_EMAILS[0] || 'admin@gymtime.com';
 
 /**
  * Valida la sesión del usuario y retorna su ID de tenant autorizado.
@@ -16,7 +31,7 @@ export async function getAuthorizedTenantId(paramTenantId?: string) {
         throw new Error('No autorizado: Sesión no encontrada.');
     }
 
-    const isSuperAdmin = user.email === SUPERADMIN_EMAIL;
+    const isSuperAdmin = isSuperAdminEmail(user.email);
 
     // Caso 1: SuperAdmin (Puede elegir cualquier tenant o operar globalmente)
     if (isSuperAdmin) {
@@ -58,5 +73,5 @@ export async function getAuthorizedTenantId(paramTenantId?: string) {
 export async function isUserSuperAdmin() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    return user?.email === SUPERADMIN_EMAIL;
+    return isSuperAdminEmail(user?.email);
 }

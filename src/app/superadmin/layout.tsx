@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { isUserSuperAdmin } from '@/lib/auth';
+import LogoutButton from '@/components/admin/LogoutButton';
 
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
     const isSuperAdmin = await isUserSuperAdmin();
@@ -31,9 +32,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
                         Cuentas Twilio
                     </Link>
                     <div className="pt-10">
-                        <Link href="/" className="block p-3 text-xs text-white/30 hover:text-white uppercase font-bold tracking-widest">
-                            Cerrar Sesión
-                        </Link>
+                        <LogoutButton />
                     </div>
                 </nav>
             </aside>

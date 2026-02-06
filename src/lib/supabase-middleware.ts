@@ -43,6 +43,13 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
+    // Protect /superadmin routes - must be authenticated
+    if (request.nextUrl.pathname.startsWith('/superadmin') && !user) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/login'
+        return NextResponse.redirect(url)
+    }
+
     if (request.nextUrl.pathname.startsWith('/login') && user) {
         const url = request.nextUrl.clone()
         url.pathname = '/admin' // Or dashboard

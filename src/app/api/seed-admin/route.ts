@@ -3,6 +3,14 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseServer';
 
 export async function GET(req: Request) {
+    // SECURITY: Block seed endpoint in production
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+            { error: 'Seed endpoint is disabled in production environment' },
+            { status: 403 }
+        );
+    }
+
     try {
         console.log('Starting Admin Seed checking...');
 

@@ -7,6 +7,14 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    // SECURITY: Block seed endpoint in production
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+            { error: 'Seed endpoint is disabled in production environment' },
+            { status: 403 }
+        );
+    }
+
     try {
         // 1. Create a dummy tenant
         const { data: tenant, error: tError } = await supabaseAdmin

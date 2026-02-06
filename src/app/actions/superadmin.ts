@@ -72,3 +72,122 @@ export async function createTenant(formData: FormData) {
     revalidatePath('/superadmin/tenants');
     return { success: true, tenantId: tenant.id };
 }
+
+/**
+ * Toggle a tenant's status between ACTIVE and SUSPENDED
+ * Only SuperAdmin can perform this action
+ */
+export async function toggleTenantStatus(tenantId: string) {
+    if (!await isUserSuperAdmin()) {
+        return { success: false, error: 'No autorizado: Solo el SuperAdministrador puede modificar gimnasios.' };
+    }
+
+    // Get current status
+    const { data: tenant, error: fetchError } = await supabaseAdmin
+        .from('tenants')
+        .select('status')
+        .eq('id', tenantId)
+        .single();
+
+    if (fetchError || !tenant) {
+        return { success: false, error: 'Gimnasio no encontrado.' };
+    }
+
+    const newStatus = tenant.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+
+    const { error } = await supabaseAdmin
+        .from('tenants')
+        .update({ status: newStatus })
+        .eq('id', tenantId);
+
+    if (error) {
+        console.error('Toggle Tenant Status Error:', error);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/superadmin/tenants');
+    revalidatePath('/superadmin');
+    return { success: true, newStatus };
+}
+
+/**
+ * Update tenant details
+ * Only SuperAdmin can perform this action
+ */
+export async function updateTenant(tenantId: string, data: {
+    name?: string;
+    admin_email?: string;
+    country?: string;
+}) {
+    if (!await isUserSuperAdmin()) {
+        return { success: false, error: 'No autorizado: Solo el SuperAdministrador puede modificar gimnasios.' };
+    }
+
+    const updateData: any = {};
+    if (data.name) updateData.name = data.name;
+    if (data.admin_email) updateData.admin_email = data.admin_email;
+    if (data.country) {
+        const config = getCountryConfig(data.country);
+        updateData.country = config.name;
+        updateData.currency_symbol = config.currencySymbol;
+        updateData.currency_code = config.currencyCode;
+        updateData.timezone = config.timezone;
+    }
+
+    const { error } = await supabaseAdmin
+        .from('tenants')
+        .update(updateData)
+        .eq('id', tenantId);
+
+    if (error) {
+        console.error('Update Tenant Error:', error);
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/superadmin/tenants');
+    return { success: true };
+}
+
+/**
+ * Test Twilio connection for a tenant
+ * Only SuperAdmin can perform this action
+ */
+export async function testTwilioConnection(tenantId: string) {
+    if (!await isUserSuperAdmin()) {
+        return { success: false, error: 'No autorizado.' };
+    }
+
+    // Fetch Twilio config for this tenant
+    const { data: twilioConfig, error: fetchError } = await supabaseAdmin
+        .from('twilio_accounts')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .single();
+
+    if (fetchError || !twilioConfig) {
+        return { success: false, error: 'Configuración de Twilio no encontrada para este gimnasio.' };
+    }
+
+    try {
+        // Import Twilio dynamically to avoid issues if not installed
+        const twilio = require('twilio');
+        const client = twilio(twilioConfig.account_sid, twilioConfig.auth_token);
+
+        // Fetch account info to verify credentials
+        const account = await client.api.accounts(twilioConfig.account_sid).fetch();
+
+        return {
+            success: true,
+            accountName: account.friendlyName,
+            accountStatus: account.status,
+            message: `Conexión exitosa. Cuenta: ${account.friendlyName} (${account.status})`
+        };
+    } catch (error: any) {
+        console.error('Twilio Test Error:', error);
+        return {
+            success: false,
+            error: `Error de conexión: ${error.message}`
+        };
+    }
+}
+

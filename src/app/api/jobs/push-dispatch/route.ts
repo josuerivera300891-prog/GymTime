@@ -2,15 +2,29 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import webpush from 'web-push';
 
-// Set VAPID keys only if all required environment variables are present
-const vapidSubject = process.env.VAPID_SUBJECT;
-const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+// VAPID keys are set lazily inside the POST handler to prevent build-time errors
+let vapidConfigured = false;
 
-if (vapidSubject && vapidPublicKey && vapidPrivateKey) {
-    webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
-} else {
+function ensureVapidConfigured() {
+    if (vapidConfigured) return true;
+
+    const vapidSubject = process.env.VAPID_SUBJECT;
+    const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+    const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+    if (vapidSubject && vapidPublicKey && vapidPrivateKey) {
+        try {
+            webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+            vapidConfigured = true;
+            return true;
+        } catch (error) {
+            console.error('Failed to configure VAPID:', error);
+            return false;
+        }
+    }
+
     console.warn('⚠️ VAPID keys not configured. Push notifications will not work.');
+    return false;
 }
 
 
@@ -18,6 +32,11 @@ export async function POST(req: Request) {
     const authHeader = req.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Configure VAPID lazily (at runtime, not build time)
+    if (!ensureVapidConfigured()) {
+        return NextResponse.json({ error: 'VAPID keys not properly configured' }, { status: 500 });
     }
 
     try {
