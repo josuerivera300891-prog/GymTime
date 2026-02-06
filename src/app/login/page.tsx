@@ -1,5 +1,8 @@
 'use client';
 
+// Force dynamic rendering to avoid build-time errors
+export const dynamic = 'force-dynamic';
+
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

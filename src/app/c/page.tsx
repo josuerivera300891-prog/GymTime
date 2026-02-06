@@ -1,10 +1,14 @@
 'use client';
 
+// Force dynamic rendering to avoid build-time errors
+export const dynamic = 'force-dynamic';
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { uploadMemberPhoto } from '@/app/actions/members';
 import { QRCodeSVG } from 'qrcode.react';
 import NotificationModal from '@/components/NotificationModal';
+
 
 export default function ClientPage() {
     const searchParams = useSearchParams();
