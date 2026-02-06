@@ -10,6 +10,10 @@ const nextConfig = {
         // your project has type errors.
         ignoreBuildErrors: true,
     },
+    // Increase static generation timeout
+    staticPageGenerationTimeout: 180,
+    // Configure for serverless deployment
+    output: 'standalone',
     images: {
         remotePatterns: [
             {
@@ -21,6 +25,5 @@ const nextConfig = {
         ],
     },
 };
-
 
 export default nextConfig;
