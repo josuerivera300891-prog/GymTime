@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
+import Link from 'next/link';
 
 export default async function TenantsPage() {
     const { data: tenants, error } = await supabaseAdmin
@@ -13,9 +14,12 @@ export default async function TenantsPage() {
                     <h1 className="text-3xl font-bold text-white">Gestión de Gimnasios</h1>
                     <p className="text-white/50 text-sm">Administra todos los gimnasios (tenants) registrados en la plataforma.</p>
                 </div>
-                <button className="bg-brand-600 hover:bg-brand-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-lg active:scale-95">
+                <Link
+                    href="/superadmin/tenants/new"
+                    className="bg-brand-600 hover:bg-brand-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-lg active:scale-95 block"
+                >
                     + Registrar Nuevo Gym
-                </button>
+                </Link>
             </div>
 
             <div className="glass-card !p-0 overflow-hidden border-white/5 bg-black/40">
@@ -36,7 +40,10 @@ export default async function TenantsPage() {
                                     <div className="font-bold text-white group-hover:text-brand-400 transition-colors">{tenant.name}</div>
                                     <div className="text-[10px] text-white/30 font-mono uppercase">{tenant.id}</div>
                                 </td>
-                                <td className="px-6 py-4 text-white/70">{tenant.country}</td>
+                                <td className="px-6 py-4 text-white/70">
+                                    {tenant.country}
+                                    <div className="text-[10px] text-white/30">{tenant.admin_email}</div>
+                                </td>
                                 <td className="px-6 py-4">
                                     <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-tighter uppercase ${tenant.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                                         }`}>
@@ -44,12 +51,22 @@ export default async function TenantsPage() {
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-white/60">
-                                    {/* In a real query with joins, this would be updated */}
-                                    <span className="font-mono">{Math.floor(Math.random() * 50)}</span>
+                                    {/* Display actual member count from the database query members(count) */}
+                                    <span className="font-mono">
+                                        {Array.isArray(tenant.members) && tenant.members[0]
+                                            ? tenant.members[0].count
+                                            : 0}
+                                    </span>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <button className="text-brand-400 hover:text-white text-xs font-black uppercase tracking-widest mr-4">Editar</button>
-                                    <button className="text-red-400/50 hover:text-red-400 text-xs font-black uppercase tracking-widest">Suspender</button>
+                                    <Link
+                                        href={`/admin?tenant_id=${tenant.id}`}
+                                        className="text-emerald-400 hover:text-white text-xs font-black uppercase tracking-widest mr-4 transition-colors"
+                                    >
+                                        Acceder
+                                    </Link>
+                                    <button className="text-brand-400 hover:text-white text-xs font-black uppercase tracking-widest mr-4 transition-colors">Editar</button>
+                                    <button className="text-red-400/50 hover:text-red-400 text-xs font-black uppercase tracking-widest transition-colors">Suspender</button>
                                 </td>
                             </tr>
                         ))}

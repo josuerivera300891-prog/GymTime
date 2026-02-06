@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { updateTenantBranding } from '@/app/actions/tenant';
+import { COUNTRY_CONFIGS, TIMEZONE_OPTIONS } from '@/lib/countries';
 
 interface BrandingFormProps {
     tenant: any;
@@ -14,6 +15,12 @@ export default function BrandingForm({ tenant, twilio }: BrandingFormProps) {
     const [previewColor, setPreviewColor] = useState(tenant?.primary_color || '#E6007E');
     const [previewLogo, setPreviewLogo] = useState(tenant?.logo_url || '');
 
+    // Regional config state
+    const [selectedCountry, setSelectedCountry] = useState(tenant?.country || 'Guatemala');
+    const [currencySymbol, setCurrencySymbol] = useState(tenant?.currency_symbol || 'Q');
+    const [currencyCode, setCurrencyCode] = useState(tenant?.currency_code || 'GTQ');
+    const [timezone, setTimezone] = useState(tenant?.timezone || 'America/Guatemala');
+
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (file) {
@@ -22,6 +29,18 @@ export default function BrandingForm({ tenant, twilio }: BrandingFormProps) {
                 setPreviewLogo(reader.result as string);
             };
             reader.readAsDataURL(file);
+        }
+    }
+
+    function handleCountryChange(e: React.ChangeEvent<HTMLSelectElement>) {
+        const country = e.target.value;
+        const config = COUNTRY_CONFIGS[country];
+
+        if (config) {
+            setSelectedCountry(country);
+            setCurrencySymbol(config.currencySymbol);
+            setCurrencyCode(config.currencyCode);
+            setTimezone(config.timezone);
         }
     }
 
@@ -125,34 +144,55 @@ export default function BrandingForm({ tenant, twilio }: BrandingFormProps) {
 
                         <div>
                             <label className="block text-sm text-white/50 mb-2">País</label>
-                            <select name="country" className="input-field w-full" defaultValue={tenant?.country}>
-                                <option value="Guatemala">Guatemala (Q)</option>
-                                <option value="Honduras">Honduras (L)</option>
-                                <option value="El Salvador">El Salvador ($)</option>
-                                <option value="Nicaragua">Nicaragua (C$)</option>
-                                <option value="Costa Rica">Costa Rica (₡)</option>
-                                <option value="Panama">Panamá ($)</option>
-                                <option value="Mexico">México ($)</option>
-                                <option value="Colombia">Colombia ($)</option>
+                            <select
+                                name="country"
+                                className="input-field w-full"
+                                value={selectedCountry}
+                                onChange={handleCountryChange}
+                            >
+                                {Object.values(COUNTRY_CONFIGS).map(config => (
+                                    <option key={config.name} value={config.name}>
+                                        {config.displayName}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-sm text-white/50 mb-2">Símbolo de Moneda</label>
-                            <input type="text" name="currency_symbol" className="input-field w-full" defaultValue={tenant?.currency_symbol || 'Q'} maxLength={3} />
+                            <input
+                                type="text"
+                                name="currency_symbol"
+                                className="input-field w-full bg-white/5"
+                                value={currencySymbol}
+                                onChange={(e) => setCurrencySymbol(e.target.value)}
+                                maxLength={3}
+                            />
                         </div>
 
                         <div>
                             <label className="block text-sm text-white/50 mb-2">Código ISO</label>
-                            <input type="text" name="currency_code" className="input-field w-full" defaultValue={tenant?.currency_code || 'GTQ'} maxLength={3} />
+                            <input
+                                type="text"
+                                name="currency_code"
+                                className="input-field w-full bg-white/5"
+                                value={currencyCode}
+                                onChange={(e) => setCurrencyCode(e.target.value)}
+                                maxLength={3}
+                            />
                         </div>
 
-                        <div>
+                        <div className="md:col-span-2">
                             <label className="block text-sm text-white/50 mb-2">Zona Horaria</label>
-                            <select name="timezone" className="input-field w-full" defaultValue={tenant?.timezone}>
-                                <option value="America/Guatemala">America/Guatemala</option>
-                                <option value="America/Mexico_City">America/Mexico_City</option>
-                                <option value="America/Bogota">America/Bogota</option>
+                            <select
+                                name="timezone"
+                                className="input-field w-full"
+                                value={timezone}
+                                onChange={(e) => setTimezone(e.target.value)}
+                            >
+                                {TIMEZONE_OPTIONS.map(tz => (
+                                    <option key={tz} value={tz}>{tz}</option>
+                                ))}
                             </select>
                         </div>
                     </div>

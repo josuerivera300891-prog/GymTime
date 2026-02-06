@@ -24,7 +24,27 @@ export async function POST(req: Request) {
 
         if (tError) throw tError;
 
-        // 2. Create members with different due dates
+
+        // 2.5 Seed Plans
+        const plansData = [
+            { name: 'Mensualidad', price: 350.00, duration_days: 30 },
+            { name: 'Quincena', price: 200.00, duration_days: 15 },
+            { name: 'Semana', price: 125.00, duration_days: 7 },
+            { name: 'Día', price: 35.00, duration_days: 1 },
+            { name: 'Visita', price: 25.00, duration_days: 1 },
+        ];
+
+        for (const p of plansData) {
+            await supabaseAdmin.from('plans').insert({
+                tenant_id: tenant.id,
+                name: p.name,
+                price: p.price,
+                duration_days: p.duration_days,
+                active: true
+            });
+        }
+
+        // 3. Create members with different due dates
         const memberData = [
             { name: 'Juan Perez', phone: '+50212345678', offset: -10 }, // Active
             { name: 'Maria Lopez', phone: '+50287654321', offset: -31 }, // Expired

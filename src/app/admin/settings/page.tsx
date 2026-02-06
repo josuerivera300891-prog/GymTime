@@ -1,11 +1,30 @@
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import BrandingForm from '@/components/admin/BrandingForm';
 
-export default async function SettingsPage() {
-    // In a real app, we'd fetch for the specific tenant_id of the session
-    // For demo, we get the first one available
-    const { data: tenant, error: tError } = await supabaseAdmin.from('tenants').select('*').limit(1).single();
-    const { data: twilio } = await supabaseAdmin.from('twilio_accounts').select('*').eq('tenant_id', tenant?.id).single();
+export default async function SettingsPage({
+    searchParams
+}: {
+    searchParams: { tenant_id?: string }
+}) {
+    const tenantIdParam = searchParams?.tenant_id;
+
+    // Resolve Tenant
+    let query = supabaseAdmin.from('tenants').select('*');
+
+    if (tenantIdParam) {
+        query = query.eq('id', tenantIdParam);
+    } else {
+        // Fallback for regular admins: get the first one they have access to 
+        // (In production this would be filtered by their session)
+        query = query.limit(1);
+    }
+
+    const { data: tenant, error: tError } = await query.single();
+    const { data: twilio } = await supabaseAdmin
+        .from('twilio_accounts')
+        .select('*')
+        .eq('tenant_id', tenant?.id)
+        .maybeSingle();
 
     return (
         <div className="space-y-8 max-w-4xl">

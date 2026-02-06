@@ -1,31 +1,42 @@
 'use server';
 
+import { createClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { revalidatePath } from 'next/cache';
 import { addDays } from 'date-fns';
 
 export async function createPayment(formData: FormData) {
+    const supabase = await createClient();
+
+    // Verify Session
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { success: false, error: 'Unauthorized' };
+    }
+
     const memberId = formData.get('member_id') as string;
     const amount = parseFloat(formData.get('amount') as string);
     const type = formData.get('type') as string;
     const renewMembership = formData.get('renew_membership') === 'true';
 
-    // Hardcoded for now, but should come from session
-    // We need to fetch tenant_id from the member to be safe
-    const { data: member, error: mError } = await supabaseAdmin
+    const isSuperAdmin = user.email === 'admin@gymtime.com';
+    const dataClient = isSuperAdmin ? supabaseAdmin : supabase;
+
+    // Fetch tenant_id from the member (Bypass RLS if SuperAdmin)
+    const { data: member, error: mError } = await dataClient
         .from('members')
         .select('tenant_id')
         .eq('id', memberId)
         .single();
 
     if (mError || !member) {
-        return { success: false, error: 'Member not found' };
+        return { success: false, error: 'Member not found or access denied' };
     }
 
     const tenantId = member.tenant_id;
 
     // 1. Create Payment Record
-    const { data: payment, error: pError } = await supabaseAdmin
+    const { data: payment, error: pError } = await dataClient
         .from('payments')
         .insert({
             tenant_id: tenantId,
@@ -44,7 +55,8 @@ export async function createPayment(formData: FormData) {
     // 2. Add Line Items
     if (renewMembership) {
         const memAmount = parseFloat(formData.get('membership_amount') as string);
-        await supabaseAdmin.from('payment_items').insert({
+        await dataClient.from('payment_items').insert({
+            tenant_id: payment.tenant_id, // Add tenant context
             payment_id: payment.id,
             description: 'Renovación de Membresía',
             quantity: 1,
@@ -54,7 +66,7 @@ export async function createPayment(formData: FormData) {
 
         // UPDATE MEMBERSHIP
         // Find current membership
-        const { data: membership } = await supabaseAdmin
+        const { data: membership } = await dataClient
             .from('memberships')
             .select('*')
             .eq('member_id', memberId)
@@ -66,14 +78,30 @@ export async function createPayment(formData: FormData) {
             const today = new Date();
             // If expired, start from today. If active, add to current due date.
             const baseDate = currentDue < today ? today : currentDue;
-            const newDueDate = addDays(baseDate, 30); // Assuming 30 days for now
 
-            await supabaseAdmin.from('memberships')
-                .update({
-                    status: 'ACTIVE',
-                    next_due_date: newDueDate.toISOString().split('T')[0],
-                    last_payment_date: new Date().toISOString().split('T')[0]
-                })
+            const newPlanDays = parseInt(formData.get('new_plan_days') as string) || 30;
+            const newPlanName = formData.get('new_plan_name') as string;
+
+            const newDueDate = addDays(baseDate, newPlanDays);
+
+            // Prepare update data
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const updateData: any = {
+                status: 'ACTIVE',
+                next_due_date: newDueDate.toISOString().split('T')[0],
+                last_payment_date: new Date().toISOString().split('T')[0],
+                amount: memAmount, // Update recurring amount to the new plan price
+            };
+
+            if (newPlanName) {
+                updateData.plan_name = newPlanName;
+            } else if (membership.plan_name) {
+                // Preserve current plan if no new plan is provided
+                updateData.plan_name = membership.plan_name;
+            }
+
+            await dataClient.from('memberships')
+                .update(updateData)
                 .eq('id', membership.id);
         }
     }
@@ -83,7 +111,8 @@ export async function createPayment(formData: FormData) {
     if (cartJson) {
         const cart = JSON.parse(cartJson);
         for (const item of cart) {
-            await supabaseAdmin.from('payment_items').insert({
+            await dataClient.from('payment_items').insert({
+                tenant_id: payment.tenant_id,
                 payment_id: payment.id,
                 product_id: item.product_id,
                 description: item.name,

@@ -1,39 +1,46 @@
 import React from 'react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase-server';
+import SidebarHeader from '@/components/admin/SidebarHeader';
+import SidebarNav from '@/components/admin/SidebarNav';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+import { isUserSuperAdmin } from '@/lib/auth';
+
+export default async function AdminLayout({
+    children
+}: {
+    children: React.ReactNode
+}) {
+    const isSuperAdmin = await isUserSuperAdmin();
+
+    // If SuperAdmin, we might have a tenant_id in the URL to show context
+    // Layouts don't get searchParams directly in Next.js, 
+    // but we can assume they'll see the dashboard or members.
+
     return (
         <div className="flex min-h-screen">
             {/* Sidebar */}
-            <aside className="w-64 border-r border-white/10 bg-black/20 backdrop-blur-md p-6">
-                <div className="text-2xl font-bold bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent mb-10">
-                    GymTime
-                </div>
+            <aside className="w-64 border-r border-white/10 bg-[#0A0A0A] p-6 flex flex-col fixed inset-y-0 shadow-2xl overflow-y-auto">
+                <SidebarHeader />
 
-                <nav className="space-y-4">
-                    <Link href="/admin" className="block text-white/70 hover:text-brand-400 font-medium transition-colors">
-                        Dashboard
-                    </Link>
-                    <Link href="/admin/members" className="block text-white/70 hover:text-brand-400 font-medium transition-colors">
-                        Miembros
-                    </Link>
-                    <Link href="/admin/scanner" className="block text-white/7 group flex items-center gap-2 hover:text-brand-400 font-medium transition-colors">
-                        Scanner <span className="text-[8px] bg-brand-600 px-1 rounded text-white font-black animate-pulse">NUEVO</span>
-                    </Link>
-                    <Link href="/admin/products" className="block text-white/70 hover:text-brand-400 font-medium transition-colors">
-                        Inventario
-                    </Link>
-                    <Link href="/admin/payments" className="block text-white/70 hover:text-brand-400 font-medium transition-colors">
-                        Pagos
-                    </Link>
-                    <Link href="/admin/settings" className="block text-white/70 hover:text-brand-400 font-medium transition-colors">
-                        Configuración
-                    </Link>
-                </nav>
+                {isSuperAdmin && (
+                    <div className="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl animate-pulse">
+                        <div className="text-[10px] font-black uppercase text-emerald-400 mb-1 tracking-widest">Supervisor</div>
+                        <div className="text-xs text-white/70 mb-3 leading-tight">Viendo panel con privilegios globales.</div>
+                        <Link
+                            href="/superadmin/tenants"
+                            className="bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-black uppercase py-2 px-3 rounded-lg block text-center transition-all"
+                        >
+                            ← Salir
+                        </Link>
+                    </div>
+                )}
+
+                <SidebarNav />
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-8 overflow-auto">
+            <main className="flex-1 ml-64 p-8 overflow-auto bg-[#050505] min-h-screen">
                 {children}
             </main>
         </div>

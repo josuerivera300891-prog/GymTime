@@ -1,10 +1,17 @@
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabaseServer';
 import { revalidatePath } from 'next/cache';
+import { supabaseAdmin } from '@/lib/supabaseServer';
+import { getAuthorizedTenantId } from '@/lib/auth';
 
-export async function updateTenantBranding(tenantId: string, formData: FormData) {
+export async function updateTenantBranding(targetTenantId: string, formData: FormData) {
     try {
+        const { tenantId, isSuperAdmin } = await getAuthorizedTenantId(targetTenantId);
+
+        if (!tenantId) {
+            return { success: false, error: 'ID de gimnasio no especificado o no autorizado.' };
+        }
+
         const name = formData.get('name') as string;
         const logoFile = formData.get('logo_file') as File;
         const primary_color = formData.get('primary_color') as string;
@@ -31,9 +38,8 @@ export async function updateTenantBranding(tenantId: string, formData: FormData)
 
             if (uploadError) {
                 console.error('Upload Error:', uploadError);
-                // If bucket doesn't exist, try to create it or reporting it
                 if (uploadError.message.includes('bucket not found')) {
-                    return { success: false, error: 'Storage bucket "branding" no encontrado. Configura el Bucket en Supabase.' };
+                    return { success: false, error: 'Storage bucket "branding" no encontrado.' };
                 }
                 return { success: false, error: `Error al subir logo: ${uploadError.message}` };
             }
@@ -68,9 +74,30 @@ export async function updateTenantBranding(tenantId: string, formData: FormData)
         return { success: true };
     } catch (err: any) {
         console.error('Server Action Error:', err);
-        if (err.message === 'fetch failed') {
-            return { success: false, error: 'Error de conexión con Supabase (DNS no resuelto todavía). Reintenta en unos minutos.' };
-        }
         return { success: false, error: `Error inesperado: ${err.message}` };
+    }
+}
+
+export async function getTenantBranding(targetTenantId?: string) {
+    try {
+        const { tenantId } = await getAuthorizedTenantId(targetTenantId);
+
+        if (!tenantId) return null;
+
+        const { data, error } = await supabaseAdmin
+            .from('tenants')
+            .select('id, name, logo_url, primary_color')
+            .eq('id', tenantId)
+            .single();
+
+        if (error || !data) {
+            console.error('Error fetching tenant branding:', error);
+            return null;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('getTenantBranding Error:', error);
+        return null;
     }
 }

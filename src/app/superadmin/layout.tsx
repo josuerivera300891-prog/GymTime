@@ -1,7 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
-export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+import { isUserSuperAdmin } from '@/lib/auth';
+
+export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+    const isSuperAdmin = await isUserSuperAdmin();
+
+    if (!isSuperAdmin) {
+        redirect('/admin');
+    }
+
     return (
         <div className="flex min-h-screen bg-[#050505]">
             {/* Sidebar */}
