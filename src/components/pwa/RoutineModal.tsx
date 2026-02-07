@@ -24,6 +24,38 @@ export const ROUTINE_TYPES = [
     { id: 'descanso', name: 'Descanso' },
 ];
 
+const RoutineTypeSelector = React.memo<{
+    selectedType: string,
+    onSelect: (type: string) => void,
+    primaryColor: string
+}>(({ selectedType, onSelect, primaryColor }) => (
+    <div className="grid grid-cols-4 gap-3">
+        {ROUTINE_TYPES.map((type) => (
+            <button
+                key={type.id}
+                onClick={() => onSelect(type.id)}
+                className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl transition-transform active:scale-95 duration-200 border touch-manipulation select-none ${selectedType === type.id
+                    ? 'border-white/20 bg-white/10'
+                    : 'border-white/5 bg-white/[0.02] active:bg-white/5'
+                    }`}
+            >
+                <div className={`transition-transform duration-300 ${selectedType === type.id ? 'scale-110' : 'opacity-60 grayscale'}`}>
+                    <RoutineIconRenderer
+                        type={type.id}
+                        className="w-10 h-10"
+                        color={selectedType === type.id ? primaryColor : 'white'}
+                    />
+                </div>
+                <span className={`text-[8px] font-black uppercase tracking-tighter mt-2 ${selectedType === type.id ? 'text-white' : 'text-white/20'}`}>
+                    {type.name}
+                </span>
+            </button>
+        ))}
+    </div>
+));
+
+RoutineTypeSelector.displayName = 'RoutineTypeSelector';
+
 export const RoutineModal: React.FC<RoutineModalProps> = ({
     isOpen,
     onClose,
@@ -117,29 +149,11 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
 
                 <div className="space-y-4">
                     <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">¿Qué entrenaste hoy?</label>
-                    <div className="grid grid-cols-4 gap-3">
-                        {ROUTINE_TYPES.map((type) => (
-                            <button
-                                key={type.id}
-                                onClick={() => setRoutineType(type.id)}
-                                className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl transition-all duration-200 border touch-manipulation active:scale-90 select-none ${routineType === type.id
-                                    ? 'border-white/20 bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]'
-                                    : 'border-white/5 bg-white/[0.02] active:bg-white/5'
-                                    }`}
-                            >
-                                <div className={`transition-transform duration-500 ${routineType === type.id ? 'scale-110' : 'opacity-60 grayscale'}`}>
-                                    <RoutineIconRenderer
-                                        type={type.id}
-                                        className="w-10 h-10"
-                                        color={routineType === type.id ? primaryColor : 'white'}
-                                    />
-                                </div>
-                                <span className={`text-[8px] font-black uppercase tracking-tighter mt-2 ${routineType === type.id ? 'text-white' : 'text-white/20'}`}>
-                                    {type.name}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
+                    <RoutineTypeSelector
+                        selectedType={routineType}
+                        onSelect={setRoutineType}
+                        primaryColor={primaryColor}
+                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
