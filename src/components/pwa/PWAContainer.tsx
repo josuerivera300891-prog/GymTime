@@ -10,15 +10,15 @@ interface PWAContainerProps {
 export const PWAContainer: React.FC<PWAContainerProps> = ({ children, primaryColor }) => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] text-white p-4 pb-24 font-sans relative overflow-x-hidden">
-            {/* Premium Animated Background */}
-            <div className="fixed inset-0 opacity-20 pointer-events-none">
+            {/* Premium Animated Background (Optimized for Mobile) */}
+            <div className="fixed inset-0 opacity-10 pointer-events-none">
                 <div
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full blur-[200px] animate-pulse"
-                    style={{ background: `radial-gradient(circle, ${primaryColor}30 0%, #7c3aed20 40%, transparent 70%)` }}
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[120px]"
+                    style={{ background: `radial-gradient(circle, ${primaryColor}25 0%, transparent 70%)` }}
                 ></div>
                 <div
-                    className="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full blur-[180px]"
-                    style={{ background: `radial-gradient(circle, #3b82f620 0%, transparent 70%)` }}
+                    className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-[100px]"
+                    style={{ background: `radial-gradient(circle, #3b82f615 0%, transparent 70%)` }}
                 ></div>
             </div>
             {/* Noise Texture Overlay */}

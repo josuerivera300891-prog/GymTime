@@ -25,9 +25,25 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
     };
 
     const getRoutineForDay = (day: Date) => {
+        if (!member.member_routines) return null;
         const dateStr = day.toISOString().split('T')[0];
-        return member.member_routines?.find((r: any) => r.date === dateStr);
+        return member.member_routines.find((r: any) => r.date === dateStr);
     };
+
+    // Pre-calculate attendance dates for O(1) lookup in the render loop
+    const attendanceDatesSet = React.useMemo(() => {
+        return new Set(
+            (member.attendance || []).map((v: any) => new Date(v.checked_in_at).toDateString())
+        );
+    }, [member.attendance]);
+
+    const routineDatesMap = React.useMemo(() => {
+        const map = new Map();
+        (member.member_routines || []).forEach((r: any) => {
+            map.set(r.date, r);
+        });
+        return map;
+    }, [member.member_routines]);
 
     // Memoize the calendar grid to avoid recalculating on every render
     const days = React.useMemo(() => {
@@ -122,10 +138,11 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                 <div className="grid grid-cols-7 gap-y-4 gap-x-2">
                     {days.map((item, i) => {
                         const { date, currentMonth } = item;
-                        const hasVisited = member.attendance?.some((v: any) =>
-                            new Date(v.checked_in_at).toLocaleDateString() === date.toLocaleDateString()
-                        );
-                        const routine = getRoutineForDay(date);
+                        const dateString = date.toDateString();
+                        const dateISO = date.toISOString().split('T')[0];
+
+                        const hasVisited = attendanceDatesSet.has(dateString);
+                        const routine = routineDatesMap.get(dateISO);
 
                         return (
                             <div
@@ -137,7 +154,7 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                                     className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center relative transition-all duration-300 
                                         ${hasVisited ? 'shadow-[0_0_15px]' : 'bg-white/[0.03]'} 
                                         ${routine ? 'border border-white/10' : ''}
-                                        ${date.toDateString() === selectedDateStr ? 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#050505]' : 'group-active:scale-90 group-active:bg-white/10'}
+                                        ${dateString === selectedDateStr ? 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#050505]' : 'group-active:scale-90 group-active:bg-white/10'}
                                     `}
                                     style={hasVisited ? { background: primaryColor, boxShadow: `0 0 15px ${primaryColor}60` } : {}}
                                 >

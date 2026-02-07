@@ -18,7 +18,7 @@ export const InstallBanner: React.FC<InstallBannerProps> = ({
     hasDeferredPrompt
 }) => {
     return (
-        <div className="fixed bottom-24 left-4 right-4 z-[60] animate-in slide-in-from-bottom-10 fade-in duration-700">
+        <div className="fixed bottom-24 left-4 right-4 z-[60] animate-in slide-in-from-bottom-10 fade-in duration-300">
             <div className="glass-card !p-5 flex items-center justify-between gap-4 border-white/20 shadow-2xl overflow-hidden relative">
                 {/* Glow effect */}
                 <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: primaryColor }}></div>
@@ -46,10 +46,15 @@ export const InstallBanner: React.FC<InstallBannerProps> = ({
                         </button>
                     )}
                     <button
-                        onClick={onDismiss}
-                        className="p-3 rounded-xl bg-white/5 text-white/40 hover:text-white transition-colors"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onDismiss();
+                        }}
+                        className="p-5 -m-2 rounded-2xl bg-white/5 text-white/40 hover:text-white transition-all active:scale-90 active:bg-white/10 touch-manipulation border border-white/5"
+                        aria-label="Cerrar"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                     </button>
                 </div>
             </div>
