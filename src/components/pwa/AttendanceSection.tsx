@@ -91,18 +91,18 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                         <h3 className="text-xs font-black uppercase text-white/40 tracking-[0.2em]">{monthName}</h3>
                         <p className="text-[8px] text-white/20 uppercase font-black mt-1 tracking-widest">Entrenamientos registrados</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                         <button
                             onClick={() => changeMonth(-1)}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all outline-none border border-white/5"
+                            className="p-4 -m-2 rounded-2xl bg-white/5 hover:bg-white/10 active:bg-white/20 active:scale-90 transition-all outline-none border border-white/5 touch-none select-none"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
                         </button>
                         <button
                             onClick={() => changeMonth(1)}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all outline-none border border-white/5"
+                            className="p-4 -m-2 rounded-2xl bg-white/5 hover:bg-white/10 active:bg-white/20 active:scale-90 transition-all outline-none border border-white/5 touch-none select-none"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                         </button>
                     </div>
                 </div>
@@ -132,14 +132,14 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                         return (
                             <div
                                 key={i}
-                                className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${!currentMonth ? 'opacity-20' : ''}`}
+                                className={`flex flex-col items-center cursor-pointer select-none touch-manipulation group ${!currentMonth ? 'opacity-20' : ''}`}
                                 onClick={() => handleDayClick(date)}
                             >
                                 <div
-                                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center relative transition-all duration-500 
+                                    className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center relative transition-all duration-300 
                                         ${hasVisited ? 'shadow-[0_0_15px]' : 'bg-white/[0.03]'} 
                                         ${routine ? 'border border-white/10' : ''}
-                                        ${isSelected ? 'ring-2 ring-white/20 ring-offset-2 ring-offset-[#0A0A0A]' : ''}
+                                        ${isSelected ? 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#050505]' : 'group-active:scale-90 group-active:bg-white/10'}
                                     `}
                                     style={hasVisited ? { background: primaryColor, boxShadow: `0 0 15px ${primaryColor}60` } : {}}
                                 >
@@ -218,9 +218,9 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                                 </div>
                                 <button
                                     onClick={() => setIsModalOpen(true)}
-                                    className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all"
+                                    className="p-4 -m-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-90 transition-all select-none touch-none"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
                                 </button>
                             </div>
                         );

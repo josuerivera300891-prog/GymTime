@@ -88,7 +88,7 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6 animate-in fade-in duration-200">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/80 backdrop-blur-md"
@@ -96,7 +96,7 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
             ></div>
 
             {/* Modal Content */}
-            <div className="relative w-full max-w-sm bg-[#0A0A0A] border-t sm:border border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 space-y-8 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-5 duration-500 shadow-2xl">
+            <div className="relative w-full max-w-sm bg-[#0A0A0A] border-t sm:border border-white/10 rounded-t-[2.5rem] sm:rounded-[2.5rem] p-8 space-y-8 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-5 duration-300 shadow-2xl">
                 {/* Drag Handle for mobile */}
                 <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-2 sm:hidden" onClick={onClose} />
 
@@ -109,7 +109,7 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all outline-none border border-white/5"
+                        className="p-4 -m-2 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-90 transition-all outline-none border border-white/5 touch-none"
                     >
                         <X className="w-5 h-5 text-white" />
                     </button>
@@ -122,9 +122,9 @@ export const RoutineModal: React.FC<RoutineModalProps> = ({
                             <button
                                 key={type.id}
                                 onClick={() => setRoutineType(type.id)}
-                                className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl transition-all duration-300 border ${routineType === type.id
+                                className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl transition-all duration-200 border touch-manipulation active:scale-90 select-none ${routineType === type.id
                                     ? 'border-white/20 bg-white/10 shadow-[0_0_20px_rgba(255,255,255,0.05)]'
-                                    : 'border-white/5 bg-white/[0.02] hover:bg-white/5'
+                                    : 'border-white/5 bg-white/[0.02] active:bg-white/5'
                                     }`}
                             >
                                 <div className={`transition-transform duration-500 ${routineType === type.id ? 'scale-110' : 'opacity-60 grayscale'}`}>
