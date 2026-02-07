@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { revalidatePath } from 'next/cache';
 import { addDays } from 'date-fns';
+import { isSuperAdminEmail } from '@/lib/auth';
 
 export async function createPayment(formData: FormData) {
     const supabase = await createClient();
@@ -19,7 +20,7 @@ export async function createPayment(formData: FormData) {
     const type = formData.get('type') as string;
     const renewMembership = formData.get('renew_membership') === 'true';
 
-    const isSuperAdmin = user.email === 'admin@gymtime.com';
+    const isSuperAdmin = isSuperAdminEmail(user.email);
     const dataClient = isSuperAdmin ? supabaseAdmin : supabase;
 
     // Fetch tenant_id from the member (Bypass RLS if SuperAdmin)
@@ -89,7 +90,6 @@ export async function createPayment(formData: FormData) {
             const updateData: any = {
                 status: 'ACTIVE',
                 next_due_date: newDueDate.toISOString().split('T')[0],
-                last_payment_date: new Date().toISOString().split('T')[0],
                 amount: memAmount, // Update recurring amount to the new plan price
             };
 
@@ -103,7 +103,28 @@ export async function createPayment(formData: FormData) {
             await dataClient.from('memberships')
                 .update(updateData)
                 .eq('id', membership.id);
+        } else {
+            // CREATE NEW MEMBERSHIP if member doesn't have one
+            const newPlanDays = parseInt(formData.get('new_plan_days') as string) || 30;
+            const newPlanName = formData.get('new_plan_name') as string || 'Membresía';
+            const today = new Date();
+            const newDueDate = addDays(today, newPlanDays);
+
+            await dataClient.from('memberships').insert({
+                tenant_id: tenantId,
+                member_id: memberId,
+                plan_name: newPlanName,
+                amount: memAmount,
+                status: 'ACTIVE',
+                start_date: today.toISOString().split('T')[0],
+                next_due_date: newDueDate.toISOString().split('T')[0],
+            });
         }
+
+        // Update member status to ACTIVE
+        await dataClient.from('members')
+            .update({ status: 'ACTIVE' })
+            .eq('id', memberId);
     }
 
     // Process Products Cart

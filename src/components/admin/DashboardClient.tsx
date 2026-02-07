@@ -168,7 +168,7 @@ export default function DashboardClient({
                 <div className="glass-card p-6">
                     <div className="text-orange-400 font-black uppercase tracking-widest text-xs mb-2">Productos Vendidos</div>
                     <div className="text-4xl font-black text-white">{stats.productsSold}</div>
-                    <div className="text-white/30 text-xs mt-2">Items de inventario</div>
+                    <div className="text-white/30 text-xs mt-2">Items de la tienda</div>
                 </div>
             </div>
 

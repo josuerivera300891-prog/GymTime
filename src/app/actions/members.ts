@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
+import { isSuperAdminEmail, getAuthorizedTenantId } from '@/lib/auth';
 
 // supabaseAdmin import removed as it should not be used in actions generally, 
 // unless for specific admin tasks that user context can't handle. 
@@ -15,7 +16,7 @@ export async function createMember(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { success: false, error: 'Unauthorized' };
 
-    const isSuperAdmin = user.email === 'admin@gymtime.com';
+    const isSuperAdmin = isSuperAdminEmail(user.email);
     let tenantId = formData.get('tenant_id') as string;
 
     // If not provided or if we need to verify for non-superadmin
@@ -38,6 +39,7 @@ export async function createMember(formData: FormData) {
 
     const name = formData.get('name') as string;
     const phone = formData.get('phone') as string;
+    const birthdate = formData.get('birthdate') as string || null;
     const planName = formData.get('plan_name') as string;
     const price = parseFloat(formData.get('price') as string);
     const durationDays = parseInt(formData.get('duration_days') as string) || 30;
@@ -54,6 +56,7 @@ export async function createMember(formData: FormData) {
             tenant_id: tenantId,
             name,
             phone,
+            birthdate: birthdate || null,
             status: 'ACTIVE',
             auth_token: authToken
         })
@@ -88,6 +91,37 @@ export async function createMember(formData: FormData) {
     }
 
     revalidatePath('/admin/members');
+
+    // 5. Send WhatsApp Welcome Message (Async in background)
+    try {
+        const { data: tenant } = await dataClient
+            .from('tenants')
+            .select('name')
+            .eq('id', tenantId)
+            .single();
+
+        if (member.phone && tenant) {
+            const { sendWhatsAppMessage } = await import('@/lib/whatsapp');
+
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gymtime-pwa.vercel.app';
+            const welcomeLink = `${baseUrl}/c?t=${tenantId}&token=${member.auth_token}`;
+
+            await sendWhatsAppMessage({
+                tenant_id: tenantId,
+                phone: member.phone,
+                contentSid: 'HX682c19126031581d5ed31d4826e9f26b',
+                contentVariables: {
+                    '1': member.name,
+                    '2': tenant.name,
+                    '3': welcomeLink,
+                    '4': member.auth_token
+                }
+            });
+        }
+    } catch (wsError) {
+        console.error('Failed to send welcome WhatsApp:', wsError);
+    }
+
     return { success: true, member };
 }
 
@@ -96,8 +130,11 @@ export async function uploadMemberPhoto(formData: FormData) {
     const memberId = formData.get('memberId') as string;
     const tenantId = formData.get('tenantId') as string;
 
-    if (!file || !memberId || !tenantId) {
-        return { success: false, error: 'Datos incompletos' };
+    // SECURITY: Validate authorization
+    const { tenantId: authTenantId } = await getAuthorizedTenantId(tenantId);
+
+    if (!file || !memberId || !tenantId || (authTenantId !== tenantId)) {
+        return { success: false, error: 'No autorizado o datos incompletos' };
     }
 
     const fileExt = file.name.split('.').pop();
@@ -126,7 +163,8 @@ export async function uploadMemberPhoto(formData: FormData) {
     const { error: dbError } = await supabaseAdmin
         .from('members')
         .update({ image_url: publicUrl })
-        .eq('id', memberId);
+        .eq('id', memberId)
+        .eq('tenant_id', tenantId);
 
     if (dbError) {
         return { success: false, error: 'Error al actualizar perfil' };

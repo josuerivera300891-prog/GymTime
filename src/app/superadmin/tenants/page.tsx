@@ -9,15 +9,18 @@ export default async function TenantsPage() {
         .order('created_at', { ascending: false });
 
     return (
-        <div className="space-y-8">
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-3xl font-bold text-white">Gestión de Gimnasios</h1>
-                    <p className="text-white/50 text-sm">Administra todos los gimnasios (tenants) registrados en la plataforma.</p>
-                </div>
+        <div className="max-w-6xl mx-auto space-y-8">
+            <div className="flex justify-between items-end gap-4">
+                <header className="flex flex-col gap-1">
+                    <div className="text-[10px] font-black bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 bg-clip-text text-transparent tracking-[0.2em] uppercase">
+                        GYMTIME · SUPERVISOR
+                    </div>
+                    <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter">Gestión de Gimnasios</h1>
+                    <p className="text-white/40 text-sm">Administra todos los gimnasios (tenants) registrados en la plataforma.</p>
+                </header>
                 <Link
                     href="/superadmin/tenants/new"
-                    className="bg-brand-600 hover:bg-brand-500 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-lg active:scale-95 block"
+                    className="bg-brand-500 hover:bg-brand-600 text-black font-black py-2.5 px-6 rounded-full transition-all active:scale-95 block text-xs tracking-widest uppercase"
                 >
                     + Registrar Nuevo Gym
                 </Link>

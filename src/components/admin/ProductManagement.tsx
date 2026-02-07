@@ -45,7 +45,7 @@ export default function ProductManagement({ products, currency, tenantId }: { pr
                         <div className="w-12 h-12 bg-brand-500/20 rounded-2xl flex items-center justify-center text-2xl">🏪</div>
                         <h1 className="text-4xl font-black uppercase tracking-tighter">Tienda Virtual</h1>
                     </div>
-                    <p className="text-white/50 text-sm max-w-md">Transforma tu inventario en un catálogo premium para tus miembros.</p>
+                    <p className="text-white/50 text-sm max-w-md">Transforma tu tienda en un catálogo premium para tus miembros.</p>
                 </div>
 
                 <button

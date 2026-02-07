@@ -81,6 +81,17 @@ export default function AddMemberModal({ tenantId, plans, currency }: AddMemberM
                         </div>
                     </div>
 
+                    <div>
+                        <label className="block text-sm text-white/50 mb-2">🎂 Fecha de Cumpleaños (Opcional)</label>
+                        <input
+                            type="date"
+                            name="birthdate"
+                            className="input-field w-full"
+                            max={new Date().toISOString().split('T')[0]}
+                        />
+                        <p className="text-xs text-white/30 mt-1">Para enviar felicitaciones automáticas</p>
+                    </div>
+
                     <div className="space-y-4 border-t border-white/5 pt-4">
                         <h3 className="text-sm font-bold uppercase text-brand-400 tracking-widest">Plan Inicial</h3>
 

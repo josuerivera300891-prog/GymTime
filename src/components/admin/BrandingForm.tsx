@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { updateTenantBranding } from '@/app/actions/tenant';
 import { COUNTRY_CONFIGS, TIMEZONE_OPTIONS } from '@/lib/countries';
+import WhatsAppTestModal from './WhatsAppTestModal';
+import WhatsAppOnboardingWizard from './WhatsAppOnboardingWizard';
 
 interface BrandingFormProps {
     tenant: any;
@@ -20,6 +22,8 @@ export default function BrandingForm({ tenant, twilio }: BrandingFormProps) {
     const [currencySymbol, setCurrencySymbol] = useState(tenant?.currency_symbol || 'Q');
     const [currencyCode, setCurrencyCode] = useState(tenant?.currency_code || 'GTQ');
     const [timezone, setTimezone] = useState(tenant?.timezone || 'America/Guatemala');
+    const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+    const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
 
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -212,25 +216,80 @@ export default function BrandingForm({ tenant, twilio }: BrandingFormProps) {
                     </button>
                 </div>
 
-                <div className="glass-card border-brand-500/20">
-                    <div className="flex justify-between items-start mb-6">
-                        <div>
-                            <h2 className="text-xl font-semibold">Mensajería (WhatsApp)</h2>
-                            <p className="text-sm text-white/40">Conexión vía Twilio Subaccount</p>
+                {/* WhatsApp Section */}
+                {showOnboardingWizard ? (
+                    <WhatsAppOnboardingWizard
+                        tenant={{ id: tenant.id, name: tenant.name }}
+                        existingConfig={twilio}
+                        onComplete={() => setShowOnboardingWizard(false)}
+                    />
+                ) : (
+                    <div className="glass-card border-brand-500/20">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h2 className="text-xl font-semibold">Mensajería (WhatsApp)</h2>
+                                <p className="text-sm text-white/40">Conexión vía Twilio</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                {twilio?.status === 'ACTIVE' && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsTestModalOpen(true)}
+                                        className="px-4 py-1.5 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-400 text-[10px] font-black uppercase tracking-widest border border-green-500/20 transition-all active:scale-95"
+                                    >
+                                        Enviar Prueba
+                                    </button>
+                                )}
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${twilio?.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                                    {twilio?.status === 'ACTIVE' ? 'CONECTADO' : 'SIN CONFIGURAR'}
+                                </span>
+                            </div>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${twilio?.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                            {twilio?.status || 'SIN CONFIGURAR'}
-                        </span>
-                    </div>
 
-                    <div className="space-y-4">
-                        <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-                            <div className="text-sm font-medium mb-1">Número de WhatsApp</div>
-                            <div className="text-lg font-mono text-brand-400" style={{ color: previewColor }}>{twilio?.whatsapp_number || '+X XXX XXX XXXX'}</div>
-                        </div>
-                        <p className="text-xs text-white/30 italic">* La configuración de credenciales API (SID/Token) solo es visible para el SuperAdmin por seguridad.</p>
+                        {twilio?.whatsapp_number ? (
+                            <div className="space-y-4">
+                                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
+                                    <div className="text-sm font-medium mb-1">Número de WhatsApp</div>
+                                    <div className="text-lg font-mono text-brand-400" style={{ color: previewColor }}>
+                                        {twilio.whatsapp_number.replace('whatsapp:', '')}
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowOnboardingWizard(true)}
+                                        className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 text-xs font-bold uppercase tracking-wider transition-all"
+                                    >
+                                        ⚙️ Reconfigurar
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <div className="text-5xl mb-4">💬</div>
+                                <h3 className="text-lg font-bold text-white mb-2">WhatsApp no configurado</h3>
+                                <p className="text-white/50 text-sm mb-6 max-w-md mx-auto">
+                                    Conecta tu número de WhatsApp para enviar recordatorios, notificaciones y más a tus miembros.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowOnboardingWizard(true)}
+                                    className="px-6 py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-black font-black text-sm uppercase tracking-wider transition-all"
+                                >
+                                    🚀 Configurar WhatsApp
+                                </button>
+                            </div>
+                        )}
                     </div>
-                </div>
+                )}
+
+                {isTestModalOpen && twilio && (
+                    <WhatsAppTestModal
+                        isOpen={isTestModalOpen}
+                        onClose={() => setIsTestModalOpen(false)}
+                        tenant={{ id: tenant.id, name: tenant.name }}
+                    />
+                )}
             </section>
         </form>
     );

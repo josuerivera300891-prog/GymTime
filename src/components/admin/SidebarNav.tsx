@@ -19,7 +19,7 @@ export default function SidebarNav() {
         { label: 'Dashboard', href: '/admin' },
         { label: 'Miembros', href: '/admin/members' },
         { label: 'Scanner', href: '/admin/scanner', isNew: true },
-        { label: 'Inventario', href: '/admin/products' },
+        { label: 'Tienda', href: '/admin/products' },
         { label: 'Pagos', href: '/admin/payments' },
         { label: 'Reportes', href: '/admin/reports' },
         { label: 'Membresías', href: '/admin/plans' },
@@ -33,8 +33,8 @@ export default function SidebarNav() {
                     key={item.href}
                     href={getLink(item.href)}
                     className={`block font-medium transition-colors ${isActive(item.href)
-                            ? 'text-brand-400'
-                            : 'text-white/70 hover:text-brand-400'
+                        ? 'text-brand-400'
+                        : 'text-white/70 hover:text-brand-400'
                         }`}
                 >
                     <span className="flex items-center gap-2">

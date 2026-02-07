@@ -23,34 +23,31 @@ export async function POST(req: Request) {
         // 2. Process each message
         for (const msg of pending) {
             try {
-                // Fetch tenant's Twilio config
-                const { data: twilioConfig, error: twilioError } = await supabaseAdmin
-                    .from('twilio_accounts')
-                    .select('*')
-                    .eq('tenant_id', msg.tenant_id)
-                    .single();
+                // 3. Send WhatsApp via utility
+                const { sendWhatsAppMessage } = await import('@/lib/whatsapp');
 
-                if (twilioError || !twilioConfig) {
-                    throw new Error(`Twilio config not found for tenant ${msg.tenant_id}`);
-                }
-
-                // Initialize Twilio client for this subaccount
-                const client = twilio(twilioConfig.account_sid, twilioConfig.auth_token);
-
-                // Send WhatsApp
-                await client.messages.create({
-                    from: `whatsapp:${twilioConfig.whatsapp_number}`,
-                    to: `whatsapp:${msg.phone}`,
-                    body: msg.body
+                const result = await sendWhatsAppMessage({
+                    tenant_id: msg.tenant_id,
+                    phone: msg.phone,
+                    body: msg.body,
+                    contentSid: msg.content_sid,
+                    contentVariables: msg.content_variables
                 });
 
-                // Update outbox as SENT
-                await supabaseAdmin
-                    .from('whatsapp_outbox')
-                    .update({ status: 'SENT', sent_at: new Date().toISOString() })
-                    .eq('id', msg.id);
+                if (result.success) {
+                    // Update outbox as SENT
+                    await supabaseAdmin
+                        .from('whatsapp_outbox')
+                        .update({
+                            status: 'SENT',
+                            sent_at: new Date().toISOString()
+                        })
+                        .eq('id', msg.id);
 
-                results.push({ id: msg.id, status: 'SUCCESS' });
+                    results.push({ id: msg.id, status: 'SUCCESS' });
+                } else {
+                    throw new Error(result.error);
+                }
             } catch (err: any) {
                 console.error(`Failed to send WhatsApp ${msg.id}:`, err);
 

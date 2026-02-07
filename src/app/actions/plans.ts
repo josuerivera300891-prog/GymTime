@@ -132,7 +132,8 @@ export async function updatePlan(id: string, data: any, paramTenantId?: string) 
                 price: data.price,
                 duration_days: data.duration_days
             })
-            .eq('id', id);
+            .eq('id', id)
+            .eq('tenant_id', tenantId);
 
         if (error) return { success: false, error: error.message };
         revalidatePath('/admin/plans');
@@ -174,7 +175,8 @@ export async function togglePlanStatus(id: string, currentStatus: boolean, param
         const { error } = await supabaseAdmin
             .from('plans')
             .update({ active: !currentStatus })
-            .eq('id', id);
+            .eq('id', id)
+            .eq('tenant_id', tenantId);
 
         if (error) return { success: false, error: error.message };
         revalidatePath('/admin/plans');
@@ -216,7 +218,8 @@ export async function deletePlan(planId: string, paramTenantId?: string) {
         const { error } = await supabaseAdmin
             .from('plans')
             .delete()
-            .eq('id', planId);
+            .eq('id', planId)
+            .eq('tenant_id', tenantId);
 
         if (error) {
             console.error('Delete Plan Error:', error);

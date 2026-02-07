@@ -6,6 +6,8 @@ export const dynamic = 'force-dynamic';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import Link from 'next/link';
+import { Mail, CheckCircle2 } from 'lucide-react';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -35,8 +37,18 @@ export default function LoginPage() {
                 : error.message);
             setLoading(false);
         } else {
-            router.refresh(); // Refresh to update middleware state
-            router.push('/admin');
+            const { data: { user } } = await supabase.auth.getUser();
+            const isAdmin = user?.email && (
+                user.email === 'admin@gymtime.com' ||
+                user.email.toLowerCase().includes('skalamarketing')
+            );
+
+            router.refresh();
+            if (isAdmin) {
+                router.push('/superadmin');
+            } else {
+                router.push('/admin');
+            }
         }
     }
 
@@ -45,7 +57,7 @@ export default function LoginPage() {
             <div className="w-full max-w-sm">
                 <div className="text-center mb-10">
                     <div className="text-4xl font-black text-brand-500 mb-2">GymTime</div>
-                    <p className="text-white/40">SaaS Multi-tenant de Membresías</p>
+                    <p className="text-white/40">Plataforma de gestión para gimnasios</p>
                 </div>
 
                 <form onSubmit={handleLogin} className="glass-card space-y-6">
@@ -91,7 +103,7 @@ export default function LoginPage() {
                             )}
                         </button>
                         <div className="text-center">
-                            <a href="#" className="text-xs text-white/30 hover:text-brand-400">¿Olvidaste tu contraseña?</a>
+                            <Link href="/forgot-password" title="Recuperar acceso" className="text-xs text-white/30 hover:text-brand-400 transition-colors">¿Olvidaste tu contraseña?</Link>
                         </div>
                     </div>
                 </form>

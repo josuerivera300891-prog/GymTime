@@ -43,11 +43,23 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
-    // Protect /superadmin routes - must be authenticated
-    if (request.nextUrl.pathname.startsWith('/superadmin') && !user) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/login'
-        return NextResponse.redirect(url)
+    // Protect /superadmin routes - must be authenticated and have SuperAdmin email
+    if (request.nextUrl.pathname.startsWith('/superadmin')) {
+        if (!user) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/login'
+            return NextResponse.redirect(url)
+        }
+
+        const superAdminEmails = (process.env.SUPERADMIN_EMAILS || 'admin@gymtime.com')
+            .split(',')
+            .map(e => e.trim().toLowerCase());
+
+        if (!user.email || !superAdminEmails.includes(user.email.toLowerCase())) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/admin' // Redirect to normal admin if not superadmin
+            return NextResponse.redirect(url)
+        }
     }
 
     if (request.nextUrl.pathname.startsWith('/login') && user) {

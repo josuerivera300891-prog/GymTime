@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
                 *,
                 memberships(*),
                 tenants(name, country, currency_symbol, logo_url, primary_color),
-                attendance(*)
+                attendance(*),
+                member_routines(*)
             `)
             .eq('auth_token', token)
             .single();
