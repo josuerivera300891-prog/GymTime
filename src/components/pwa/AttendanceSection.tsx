@@ -29,47 +29,49 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
         return member.member_routines?.find((r: any) => r.date === dateStr);
     };
 
-    // Calendar logic helpers
-    const getDaysInMonth = (date: Date) => {
-        const year = date.getFullYear();
-        const month = date.getMonth();
+    // Memoize the calendar grid to avoid recalculating on every render
+    const days = React.useMemo(() => {
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
 
-        const days = [];
+        const daysArray = [];
 
-        // Padding for the start of the week (assuming week starts on Monday)
-        let startingDay = firstDay.getDay(); // 0 = Sun, 1 = Mon...
-        startingDay = startingDay === 0 ? 6 : startingDay - 1; // Adjust to Mon=0, Sun=6
+        // Monday start logic
+        let startingDay = firstDay.getDay();
+        startingDay = startingDay === 0 ? 6 : startingDay - 1;
 
         for (let i = 0; i < startingDay; i++) {
             const prevDay = new Date(year, month, 1 - (startingDay - i));
-            days.push({ date: prevDay, currentMonth: false });
+            daysArray.push({ date: prevDay, currentMonth: false });
         }
 
-        // Current month days
         for (let i = 1; i <= lastDay.getDate(); i++) {
-            days.push({ date: new Date(year, month, i), currentMonth: true });
+            daysArray.push({ date: new Date(year, month, i), currentMonth: true });
         }
 
-        // Padding for the end of the week
-        const totalCells = Math.ceil(days.length / 7) * 7;
-        const remaining = totalCells - days.length;
+        const totalCells = Math.ceil(daysArray.length / 7) * 7;
+        const remaining = totalCells - daysArray.length;
         for (let i = 1; i <= remaining; i++) {
-            days.push({ date: new Date(year, month + 1, i), currentMonth: false });
+            daysArray.push({ date: new Date(year, month + 1, i), currentMonth: false });
         }
 
-        return days;
-    };
+        return daysArray;
+    }, [viewDate]);
 
-    const days = getDaysInMonth(viewDate);
-    const monthName = viewDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    const monthName = React.useMemo(() =>
+        viewDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }),
+        [viewDate]);
+
     const weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
     const changeMonth = (offset: number) => {
-        const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + offset, 1);
-        setViewDate(newDate);
+        setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
     };
+
+    const todayDateStr = React.useMemo(() => new Date().toDateString(), []);
+    const selectedDateStr = React.useMemo(() => selectedDate.toDateString(), [selectedDate]);
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
@@ -120,18 +122,14 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                 <div className="grid grid-cols-7 gap-y-4 gap-x-2">
                     {days.map((item, i) => {
                         const { date, currentMonth } = item;
-                        const isToday = date.toDateString() === new Date().toDateString();
-                        const isSelected = date.toDateString() === selectedDate.toDateString();
-
                         const hasVisited = member.attendance?.some((v: any) =>
                             new Date(v.checked_in_at).toLocaleDateString() === date.toLocaleDateString()
                         );
-
                         const routine = getRoutineForDay(date);
 
                         return (
                             <div
-                                key={i}
+                                key={`${date.getTime()}-${i}`}
                                 className={`flex flex-col items-center cursor-pointer select-none touch-manipulation group ${!currentMonth ? 'opacity-20' : ''}`}
                                 onClick={() => handleDayClick(date)}
                             >
@@ -139,7 +137,7 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                                     className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center relative transition-all duration-300 
                                         ${hasVisited ? 'shadow-[0_0_15px]' : 'bg-white/[0.03]'} 
                                         ${routine ? 'border border-white/10' : ''}
-                                        ${isSelected ? 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#050505]' : 'group-active:scale-90 group-active:bg-white/10'}
+                                        ${date.toDateString() === selectedDateStr ? 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#050505]' : 'group-active:scale-90 group-active:bg-white/10'}
                                     `}
                                     style={hasVisited ? { background: primaryColor, boxShadow: `0 0 15px ${primaryColor}60` } : {}}
                                 >
@@ -157,11 +155,11 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                                         />
                                     )}
 
-                                    {isToday && (
+                                    {date.toDateString() === todayDateStr && (
                                         <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-[#0A0A0A]" title="Hoy" />
                                     )}
                                 </div>
-                                <span className={`text-[8px] mt-2 font-black tracking-tighter transition-colors ${isSelected ? 'text-white' :
+                                <span className={`text-[8px] mt-2 font-black tracking-tighter transition-colors ${date.toDateString() === selectedDateStr ? 'text-white' :
                                     currentMonth ? 'text-white/40' : 'text-white/10'
                                     }`}>
                                     {date.getDate()}
