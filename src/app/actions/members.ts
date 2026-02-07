@@ -103,7 +103,7 @@ export async function createMember(formData: FormData) {
         if (member.phone && tenant) {
             const { sendWhatsAppMessage } = await import('@/lib/whatsapp');
 
-            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gymtime-pwa.vercel.app';
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://gym-time-mu.vercel.app';
             const welcomeLink = `${baseUrl}/c?t=${tenantId}&token=${member.auth_token}`;
 
             await sendWhatsAppMessage({
