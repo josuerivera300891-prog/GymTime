@@ -78,7 +78,7 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h3 className="text-xs font-black uppercase text-white/40 tracking-[0.2em]">{monthName}</h3>
-                        <p className="text-[8px] text-white/20 uppercase font-black mt-1 tracking-widest">Entrenamientos registrados</p>
+                        <p className="text-[8px] text-white/20 uppercase font-black mt-1 tracking-widest">Asistencias registradas</p>
                     </div>
                     <div className="flex gap-1">
                         <button

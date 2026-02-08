@@ -36,7 +36,7 @@ const IconQr = ({ color }: { color: string }) => (
 
 export const HomeSection: React.FC<HomeSectionProps> = ({ member, primaryColor, onShowQR }) => {
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-300">
             {/* Quick Stats */}
             <div className="glass-card">
                 <div className="flex items-center justify-between mb-4">
@@ -64,19 +64,12 @@ export const HomeSection: React.FC<HomeSectionProps> = ({ member, primaryColor, 
             {/* CTA Button - Show QR */}
             <button
                 onClick={onShowQR}
-                className="relative w-full py-6 rounded-3xl font-black uppercase tracking-[0.2em] text-sm text-white shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-500 flex items-center justify-center gap-4 group overflow-hidden"
+                className="relative w-full py-6 rounded-3xl font-black uppercase tracking-[0.2em] text-sm text-white shadow-2xl active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-4 group overflow-hidden"
                 style={{
                     background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 50%, #7c3aed 100%)`,
                     boxShadow: `0 10px 40px ${primaryColor}40, 0 0 20px ${primaryColor}20, inset 0 1px 0 rgba(255,255,255,0.2)`
                 }}
             >
-                {/* Shine Effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{
-                        background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-                        transform: 'translateX(-100%)',
-                        animation: 'shine 2s infinite'
-                    }}></div>
                 <IconQr color="white" />
                 <span className="relative z-10">Mostrar mi QR</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform duration-300">

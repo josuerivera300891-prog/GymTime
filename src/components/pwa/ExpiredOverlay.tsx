@@ -28,23 +28,12 @@ export const ExpiredOverlay: React.FC<ExpiredOverlayProps> = ({ member }) => {
 
     return (
         <div className="fixed inset-0 z-50 bg-gradient-to-b from-[#0a0a0a] via-[#111] to-[#0a0a0a] flex flex-col items-center justify-center p-6 text-center overflow-hidden">
-            {/* Animated Background Elements */}
+            {/* Static Background Elements (Optimized) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {[...Array(20)].map((_, i) => (
-                    <div
-                        key={i}
-                        className="absolute rounded-full opacity-10 animate-float"
-                        style={{
-                            width: `${20 + Math.random() * 40}px`,
-                            height: `${20 + Math.random() * 40}px`,
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                            background: primaryColor,
-                            animationDelay: `${Math.random() * 5}s`,
-                            animationDuration: `${5 + Math.random() * 5}s`,
-                        }}
-                    />
-                ))}
+                <div
+                    className="absolute top-0 left-0 w-full h-full opacity-5"
+                    style={{ background: `radial-gradient(circle at 20% 20%, ${primaryColor}40, transparent 50%)` }}
+                />
             </div>
 
             {/* Main Content */}
@@ -105,7 +94,7 @@ export const ExpiredOverlay: React.FC<ExpiredOverlayProps> = ({ member }) => {
 
                 {/* CTA Button */}
                 <button
-                    className="w-full py-4 rounded-2xl font-black text-white uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg animate-pulse-glow"
+                    className="w-full py-4 rounded-2xl font-black text-white uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg"
                     style={{
                         background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`,
                         boxShadow: `0 10px 40px ${primaryColor}40`
@@ -127,26 +116,12 @@ export const ExpiredOverlay: React.FC<ExpiredOverlayProps> = ({ member }) => {
 
             {/* Custom Animations */}
             <style jsx>{`
-                @keyframes float {
-                    0%, 100% { transform: translateY(0) rotate(0deg); }
-                    50% { transform: translateY(-20px) rotate(180deg); }
-                }
-                .animate-float {
-                    animation: float 8s ease-in-out infinite;
-                }
                 @keyframes bounce-slow {
                     0%, 100% { transform: translateY(0); }
                     50% { transform: translateY(-10px); }
                 }
                 .animate-bounce-slow {
                     animation: bounce-slow 3s ease-in-out infinite;
-                }
-                @keyframes pulse-glow {
-                    0%, 100% { box-shadow: 0 10px 40px ${primaryColor}40; }
-                    50% { box-shadow: 0 10px 60px ${primaryColor}60; }
-                }
-                .animate-pulse-glow {
-                    animation: pulse-glow 2s ease-in-out infinite;
                 }
             `}</style>
         </div>

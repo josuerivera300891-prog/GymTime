@@ -11,7 +11,7 @@ interface ProfileSectionProps {
 
 export const ProfileSection: React.FC<ProfileSectionProps> = ({ member, primaryColor, onFileChange, uploading }) => {
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-300">
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-black uppercase tracking-tight text-white mb-2">Mi Perfil</h2>
                 <p className="text-xs text-white/40 uppercase tracking-widest">Configuración personal</p>

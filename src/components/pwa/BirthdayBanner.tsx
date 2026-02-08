@@ -55,28 +55,7 @@ export function BirthdayBanner({ memberName, memberBirthdate, tenantName, primar
 
     return (
         <>
-            {/* Confetti Animation */}
-            {showConfetti && (
-                <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
-                    {[...Array(50)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute animate-confetti"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `-${10 + Math.random() * 20}px`,
-                                animationDelay: `${Math.random() * 3}s`,
-                                animationDuration: `${3 + Math.random() * 2}s`,
-                                backgroundColor: i % 3 === 0 ? primaryColor : i % 3 === 1 ? '#FFD700' : '#FF69B4',
-                                width: `${8 + Math.random() * 8}px`,
-                                height: `${8 + Math.random() * 8}px`,
-                                borderRadius: i % 2 === 0 ? '50%' : '0%',
-                                transform: `rotate(${Math.random() * 360}deg)`
-                            }}
-                        />
-                    ))}
-                </div>
-            )}
+
 
             {/* Birthday Banner */}
             <div
@@ -86,18 +65,18 @@ export function BirthdayBanner({ memberName, memberBirthdate, tenantName, primar
                     border: `2px solid ${primaryColor}50`
                 }}
             >
-                {/* Sparkle Effects */}
+                {/* Sparkle Effects (Static) */}
                 <div className="absolute inset-0 overflow-hidden">
-                    <svg className="absolute top-2 left-4 w-6 h-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke={primaryColor} strokeWidth="2">
+                    <svg className="absolute top-2 left-4 w-6 h-6" fill="none" viewBox="0 0 24 24" stroke={primaryColor} strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                     </svg>
-                    <svg className="absolute top-4 right-6 w-5 h-5 animate-pulse" style={{ animationDelay: '0.5s' }} fill={primaryColor} viewBox="0 0 24 24">
+                    <svg className="absolute top-4 right-6 w-5 h-5" fill={primaryColor} viewBox="0 0 24 24">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
-                    <svg className="absolute bottom-3 left-8 w-5 h-5 animate-pulse" style={{ animationDelay: '1s' }} fill="none" viewBox="0 0 24 24" stroke={primaryColor} strokeWidth="2">
+                    <svg className="absolute bottom-3 left-8 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke={primaryColor} strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
-                    <svg className="absolute bottom-2 right-4 w-6 h-6 animate-pulse" style={{ animationDelay: '0.3s' }} fill={primaryColor} viewBox="0 0 24 24">
+                    <svg className="absolute bottom-2 right-4 w-6 h-6" fill={primaryColor} viewBox="0 0 24 24">
                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
                 </div>
@@ -149,21 +128,8 @@ export function BirthdayBanner({ memberName, memberBirthdate, tenantName, primar
                 </button>
             </div>
 
-            {/* CSS for confetti animation */}
+            {/* CSS for banner animation */}
             <style jsx>{`
-                @keyframes confetti-fall {
-                    0% {
-                        transform: translateY(0) rotate(0deg);
-                        opacity: 1;
-                    }
-                    100% {
-                        transform: translateY(100vh) rotate(720deg);
-                        opacity: 0;
-                    }
-                }
-                .animate-confetti {
-                    animation: confetti-fall 4s ease-in-out forwards;
-                }
                 @keyframes bounce-in {
                     0% {
                         transform: scale(0.3);

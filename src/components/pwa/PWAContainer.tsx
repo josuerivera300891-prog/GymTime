@@ -10,15 +10,11 @@ interface PWAContainerProps {
 export const PWAContainer: React.FC<PWAContainerProps> = ({ children, primaryColor }) => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0f0f0f] to-[#0a0a0a] text-white p-4 pb-24 font-sans relative overflow-x-hidden">
-            {/* Premium Animated Background (Optimized for Mobile) */}
-            <div className="fixed inset-0 opacity-10 pointer-events-none">
+            {/* Simplified Background (Performance Optimized) */}
+            <div className="fixed inset-0 opacity-5 pointer-events-none">
                 <div
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full blur-[120px]"
-                    style={{ background: `radial-gradient(circle, ${primaryColor}25 0%, transparent 70%)` }}
-                ></div>
-                <div
-                    className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-[100px]"
-                    style={{ background: `radial-gradient(circle, #3b82f615 0%, transparent 70%)` }}
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full"
+                    style={{ background: `radial-gradient(circle, ${primaryColor}20 0%, transparent 70%)` }}
                 ></div>
             </div>
             {/* Noise Texture Overlay */}
@@ -33,7 +29,7 @@ export const PWAContainer: React.FC<PWAContainerProps> = ({ children, primaryCol
                 }
                 .glass-card {
                     background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-                    backdrop-filter: blur(20px) saturate(180%);
+                    backdrop-filter: blur(8px) saturate(150%);
                     border: 1px solid rgba(255, 255, 255, 0.12);
                     border-radius: 24px;
                     padding: 20px;
@@ -57,7 +53,7 @@ export const PWAContainer: React.FC<PWAContainerProps> = ({ children, primaryCol
                 }
                 .stat-card {
                     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-                    backdrop-filter: blur(16px) saturate(180%);
+                    backdrop-filter: blur(8px) saturate(150%);
                     border: 1px solid rgba(255, 255, 255, 0.15);
                     border-radius: 20px;
                     padding: 16px;
