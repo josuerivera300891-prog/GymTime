@@ -90,7 +90,39 @@ export async function createMember(formData: FormData) {
         return { success: false, error: 'Error al crear membresía.' };
     }
 
+    // 5. Create Payment Record (New!)
+    const paymentMethod = formData.get('payment_method') as string || 'CASH';
+    const { data: payment, error: pError } = await dataClient
+        .from('payments')
+        .insert({
+            tenant_id: tenantId,
+            member_id: member.id,
+            amount: price,
+            type: 'MEMBERSHIP',
+            method: paymentMethod
+        })
+        .select()
+        .single();
+
+    if (pError) {
+        console.error('Payment Record Error:', pError);
+        // We don't fail the whole member creation if payment fails to log, 
+        // but it's good to log it. In a strict system, we might want to roll back.
+    } else {
+        // Add line item for the payment
+        await dataClient.from('payment_items').insert({
+            tenant_id: tenantId,
+            payment_id: payment.id,
+            description: `Registro Inicial: ${planName}`,
+            quantity: 1,
+            unit_price: price,
+            total: price
+        });
+    }
+
     revalidatePath('/admin/members');
+    revalidatePath('/admin'); // Revalidate Dashboard
+    revalidatePath('/admin/payments'); // Revalidate Payments history
 
     // 5. Send WhatsApp Welcome Message (Async in background)
     try {

@@ -148,6 +148,14 @@ export default function AddMemberModal({ tenantId, plans, currency }: AddMemberM
                                 <option value="365">Anual (365 Días)</option>
                             </select>
                         </div>
+
+                        <div>
+                            <label className="block text-sm text-white/50 mb-2">Método de Pago</label>
+                            <select name="payment_method" className="input-field w-full" defaultValue="CASH">
+                                <option value="CASH">Efectivo 💵</option>
+                                <option value="CARD">Tarjeta / Transferencia 💳</option>
+                            </select>
+                        </div>
                     </div>
 
                     {message && (
