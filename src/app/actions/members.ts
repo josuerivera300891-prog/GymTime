@@ -129,11 +129,33 @@ export async function uploadMemberPhoto(formData: FormData) {
     const file = formData.get('file') as File;
     const memberId = formData.get('memberId') as string;
     const tenantId = formData.get('tenantId') as string;
+    const authToken = formData.get('authToken') as string;
 
-    // SECURITY: Validate authorization
-    const { tenantId: authTenantId } = await getAuthorizedTenantId(tenantId);
+    let isAuthorized = false;
 
-    if (!file || !memberId || !tenantId || (authTenantId !== tenantId)) {
+    // SECURITY: Dual Validation
+    if (authToken) {
+        // 1. PWA Member Validation: Check if token matches member
+        const { data: member } = await supabaseAdmin
+            .from('members')
+            .select('id')
+            .eq('id', memberId)
+            .eq('tenant_id', tenantId)
+            .eq('auth_token', authToken)
+            .maybeSingle();
+
+        if (member) isAuthorized = true;
+    } else {
+        // 2. Staff/Admin Validation: Standard session check
+        try {
+            const { tenantId: authTenantId } = await getAuthorizedTenantId(tenantId);
+            if (authTenantId === tenantId) isAuthorized = true;
+        } catch (e) {
+            isAuthorized = false;
+        }
+    }
+
+    if (!file || !memberId || !tenantId || !isAuthorized) {
         return { success: false, error: 'No autorizado o datos incompletos' };
     }
 

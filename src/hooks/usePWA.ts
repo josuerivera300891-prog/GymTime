@@ -136,6 +136,9 @@ export function usePWA() {
         formData.append('file', file);
         formData.append('memberId', member.id);
         formData.append('tenantId', member.tenant_id);
+        if (token) {
+            formData.append('authToken', token);
+        }
 
         try {
             const result = await uploadMemberPhoto(formData);
