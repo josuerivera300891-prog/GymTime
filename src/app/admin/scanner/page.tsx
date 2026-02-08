@@ -1,9 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { registerAttendance } from '@/app/actions/attendance';
 
 export default function QRScannerPage() {
+    const searchParams = useSearchParams();
+    const paramTenantId = searchParams.get('tenant_id');
+
     const [scanning, setScanning] = useState(false);
     const [lastCheckin, setLastCheckin] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
@@ -14,7 +18,7 @@ export default function QRScannerPage() {
         setError(null);
 
         try {
-            const result = await registerAttendance(token);
+            const result = await registerAttendance(token, paramTenantId || undefined);
             if (result.success && result.member) {
                 setLastCheckin({
                     name: result.member.name,

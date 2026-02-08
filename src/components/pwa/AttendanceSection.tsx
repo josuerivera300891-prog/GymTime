@@ -1,34 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { RoutineModal, ROUTINE_TYPES } from './RoutineModal';
-import { RoutineIconRenderer } from './RoutineIcons';
 
 interface AttendanceSectionProps {
     member: any;
     primaryColor: string;
-    onSaveRoutine: (routine: any) => Promise<boolean | undefined>;
 }
 
-export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, primaryColor, onSaveRoutine }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(new Date());
+export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, primaryColor }) => {
     const [viewDate, setViewDate] = useState(new Date()); // Month being viewed
-
-    const handleDayClick = (day: Date) => {
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        if (day <= today) {
-            setSelectedDate(day);
-            setIsModalOpen(true);
-        }
-    };
-
-    const getRoutineForDay = (day: Date) => {
-        if (!member.member_routines) return null;
-        const dateStr = day.toISOString().split('T')[0];
-        return member.member_routines.find((r: any) => r.date === dateStr);
-    };
 
     // Pre-calculate attendance dates for O(1) lookup in the render loop
     const attendanceDatesSet = React.useMemo(() => {
@@ -36,14 +16,6 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
             (member.attendance || []).map((v: any) => new Date(v.checked_in_at).toDateString())
         );
     }, [member.attendance]);
-
-    const routineDatesMap = React.useMemo(() => {
-        const map = new Map();
-        (member.member_routines || []).forEach((r: any) => {
-            map.set(r.date, r);
-        });
-        return map;
-    }, [member.member_routines]);
 
     // Memoize the calendar grid to avoid recalculating on every render
     const days = React.useMemo(() => {
@@ -87,7 +59,6 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
     };
 
     const todayDateStr = React.useMemo(() => new Date().toDateString(), []);
-    const selectedDateStr = React.useMemo(() => selectedDate.toDateString(), [selectedDate]);
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
@@ -139,46 +110,28 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                     {days.map((item, i) => {
                         const { date, currentMonth } = item;
                         const dateString = date.toDateString();
-                        const dateISO = date.toISOString().split('T')[0];
-
                         const hasVisited = attendanceDatesSet.has(dateString);
-                        const routine = routineDatesMap.get(dateISO);
 
                         return (
                             <div
                                 key={`${date.getTime()}-${i}`}
-                                className={`flex flex-col items-center cursor-pointer select-none touch-manipulation group ${!currentMonth ? 'opacity-20' : ''}`}
-                                onClick={() => handleDayClick(date)}
+                                className={`flex flex-col items-center select-none touch-manipulation group ${!currentMonth ? 'opacity-20' : ''}`}
                             >
                                 <div
-                                    className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center relative transition-all duration-300 
-                                        ${hasVisited ? 'shadow-[0_0_15px]' : 'bg-white/[0.03]'} 
-                                        ${routine ? 'border border-white/10' : ''}
-                                        ${dateString === selectedDateStr ? 'ring-2 ring-white/40 ring-offset-2 ring-offset-[#050505]' : 'group-active:scale-90 group-active:bg-white/10'}
+                                    className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center relative transition-all duration-300
+                                        ${hasVisited ? 'shadow-[0_0_15px]' : 'bg-white/[0.03]'}
                                     `}
                                     style={hasVisited ? { background: primaryColor, boxShadow: `0 0 15px ${primaryColor}60` } : {}}
                                 >
-                                    {routine ? (
-                                        <div className="scale-75 sm:scale-90">
-                                            <RoutineIconRenderer
-                                                type={routine.routine_type}
-                                                className="w-5 h-5"
-                                                color={hasVisited ? 'white' : 'rgba(255,255,255,0.6)'}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div
-                                            className={`w-1.5 h-1.5 rounded-full ${hasVisited ? 'bg-white shadow-[0_0_5px_white]' : 'bg-white/10'}`}
-                                        />
-                                    )}
+                                    <div
+                                        className={`w-1.5 h-1.5 rounded-full ${hasVisited ? 'bg-white shadow-[0_0_5px_white]' : 'bg-white/10'}`}
+                                    />
 
-                                    {date.toDateString() === todayDateStr && (
+                                    {dateString === todayDateStr && (
                                         <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-[#0A0A0A]" title="Hoy" />
                                     )}
                                 </div>
-                                <span className={`text-[8px] mt-2 font-black tracking-tighter transition-colors ${date.toDateString() === selectedDateStr ? 'text-white' :
-                                    currentMonth ? 'text-white/40' : 'text-white/10'
-                                    }`}>
+                                <span className={`text-[8px] mt-2 font-black tracking-tighter transition-colors ${currentMonth ? 'text-white/40' : 'text-white/10'}`}>
                                     {date.getDate()}
                                 </span>
                             </div>
@@ -186,62 +139,6 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                     })}
                 </div>
             </div>
-
-            {/* Selected Day Summary Card */}
-            {getRoutineForDay(selectedDate) && (
-                <div className="glass-card border-l-4 p-5 animate-in slide-in-from-right duration-500" style={{ borderLeftColor: primaryColor }}>
-                    {(() => {
-                        const r = getRoutineForDay(selectedDate);
-                        const type = ROUTINE_TYPES.find(t => t.id === r.routine_type);
-                        return (
-                            <div className="flex justify-between items-start">
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
-                                            <RoutineIconRenderer type={r.routine_type} className="w-6 h-6" color={primaryColor} />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-lg font-black text-white uppercase tracking-tight leading-none">{type?.name}</h4>
-                                            <p className="text-[9px] text-white/30 uppercase font-bold tracking-widest mt-1">
-                                                {selectedDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2">
-                                        {r.sets && r.reps && (
-                                            <div className="text-[10px] text-white/80 font-black uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
-                                                {r.sets} sets x {r.reps} reps
-                                            </div>
-                                        )}
-                                        {r.weight && (
-                                            <div className="text-[10px] text-white/80 font-black uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
-                                                {r.weight} kg
-                                            </div>
-                                        )}
-                                        {r.duration_minutes && (
-                                            <div className="text-[10px] text-white/80 font-black uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
-                                                {r.duration_minutes} min
-                                            </div>
-                                        )}
-                                    </div>
-                                    {r.notes && (
-                                        <div className="relative">
-                                            <div className="absolute left-0 top-0 w-0.5 h-full bg-white/10 rounded-full" />
-                                            <p className="text-[11px] text-white/50 italic font-medium leading-relaxed pl-3">"{r.notes}"</p>
-                                        </div>
-                                    )}
-                                </div>
-                                <button
-                                    onClick={() => setIsModalOpen(true)}
-                                    className="p-4 -m-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 active:scale-90 transition-all select-none touch-none"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                                </button>
-                            </div>
-                        );
-                    })()}
-                </div>
-            )}
 
             <div className="space-y-4">
                 <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/20 ml-1">Check-ins Recientes</h3>
@@ -269,15 +166,6 @@ export const AttendanceSection: React.FC<AttendanceSectionProps> = ({ member, pr
                     )}
                 </div>
             </div>
-
-            <RoutineModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={onSaveRoutine}
-                selectedDate={selectedDate}
-                existingRoutine={getRoutineForDay(selectedDate)}
-                primaryColor={primaryColor}
-            />
         </div>
     );
 };

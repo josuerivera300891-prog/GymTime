@@ -96,11 +96,10 @@ export default function ClientPage() {
                     />
                 )}
 
-                {activeTab === 'attendance' && (
+                {activeTab === 'attendance' && member && (
                     <AttendanceSection
                         member={member}
-                        primaryColor={primaryColor}
-                        onSaveRoutine={saveRoutine}
+                        primaryColor={member.tenant?.primary_color || '#8B5CF6'}
                     />
                 )}
 
