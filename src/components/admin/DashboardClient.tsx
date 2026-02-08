@@ -95,9 +95,11 @@ export default function DashboardClient({
 
     const difference = userTotal - expectedTotal;
 
-    if (!currentShift && !isShiftModalOpen && !isSuperAdmin) {
-        setIsShiftModalOpen(true);
-    }
+    useEffect(() => {
+        if (!currentShift && !isShiftModalOpen && !isSuperAdmin) {
+            setIsShiftModalOpen(true);
+        }
+    }, [currentShift, isShiftModalOpen, isSuperAdmin]);
 
     return (
         <div className="space-y-8">
