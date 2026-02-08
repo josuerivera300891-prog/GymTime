@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
             .select(`
                 *,
                 memberships(*),
-                tenants(name, country, currency_symbol, logo_url, primary_color),
+                tenants(name, country, currency_symbol, logo_url, primary_color, phone),
                 attendance(*),
                 member_routines(*)
             `)

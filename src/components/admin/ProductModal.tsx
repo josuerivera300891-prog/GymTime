@@ -6,8 +6,10 @@ type Product = {
     name: string;
     description?: string;
     price: number;
+    price_usd?: number;
     stock: number;
     image_url?: string;
+    images?: string[];
 };
 
 export default function ProductModal({
@@ -30,22 +32,25 @@ export default function ProductModal({
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
+    const [priceUsd, setPriceUsd] = useState('');
     const [stock, setStock] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
+    const [images, setImages] = useState<string[]>([]);
 
     useEffect(() => {
         if (productToEdit) {
             setName(productToEdit.name);
             setDescription(productToEdit.description || '');
             setPrice(productToEdit.price.toString());
+            setPriceUsd(productToEdit.price_usd?.toString() || '');
             setStock(productToEdit.stock.toString());
-            setImageUrl(productToEdit.image_url || '');
+            setImages(productToEdit.images || (productToEdit.image_url ? [productToEdit.image_url] : []));
         } else {
             setName('');
             setDescription('');
             setPrice('');
+            setPriceUsd('');
             setStock('');
-            setImageUrl('');
+            setImages([]);
         }
     }, [productToEdit, isOpen]);
 
@@ -53,6 +58,11 @@ export default function ProductModal({
 
     async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         if (!e.target.files || !e.target.files[0]) return;
+        if (images.length >= 5) {
+            alert('Máximo 5 imágenes por producto');
+            return;
+        }
+
         setUploading(true);
         const file = e.target.files[0];
         const formData = new FormData();
@@ -62,7 +72,7 @@ export default function ProductModal({
         try {
             const result = await uploadProductPhoto(formData);
             if (result.success) {
-                setImageUrl(result.url!);
+                setImages([...images, result.url!]);
             } else {
                 alert('Error al subir imagen: ' + result.error);
             }
@@ -74,6 +84,10 @@ export default function ProductModal({
         }
     }
 
+    const removeImage = (index: number) => {
+        setImages(images.filter((_, i) => i !== index));
+    };
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setSubmitting(true);
@@ -83,8 +97,10 @@ export default function ProductModal({
         formData.append('name', name);
         formData.append('description', description);
         formData.append('price', price);
+        formData.append('price_usd', priceUsd);
         formData.append('stock', stock);
-        formData.append('image_url', imageUrl);
+        formData.append('images', JSON.stringify(images));
+        formData.append('image_url', images[0] || ''); // Keep for legacy / main thumbnail
         formData.append('tenant_id', tenantId);
 
         const result = await upsertProduct(formData);
@@ -106,31 +122,42 @@ export default function ProductModal({
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Image Upload Section */}
-                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/10 rounded-3xl bg-white/5 group hover:border-brand-500/50 transition-all cursor-pointer relative overflow-hidden">
-                        {imageUrl ? (
-                            <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-                                <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                    <span className="text-xs font-bold uppercase tracking-widest text-white">Cambiar Imagen</span>
+                    {/* Multi-Image Upload Section */}
+                    <div className="space-y-4">
+                        <label className="block text-xs uppercase tracking-widest text-white/40 font-bold">Fotos del Producto ({images.length}/5)</label>
+                        <div className="grid grid-cols-3 gap-3">
+                            {images.map((img, idx) => (
+                                <div key={idx} className="relative aspect-square rounded-xl overflow-hidden border border-white/10 group">
+                                    <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeImage(idx)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        ✕
+                                    </button>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="text-center">
-                                <div className="text-3xl mb-2">📸</div>
-                                <div className="text-xs font-bold uppercase tracking-widest text-white/40">Subir foto del producto</div>
-                            </div>
-                        )}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                            disabled={uploading}
-                        />
+                            ))}
+                            {images.length < 5 && (
+                                <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-dashed border-white/10 bg-white/5 flex items-center justify-center group hover:border-brand-500/50 transition-all cursor-pointer">
+                                    <div className="text-center">
+                                        <div className="text-xl mb-1">📸</div>
+                                        <div className="text-[10px] uppercase font-bold text-white/40">Agregar</div>
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        disabled={uploading}
+                                    />
+                                </div>
+                            )}
+                        </div>
                         {uploading && (
-                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="flex items-center gap-3 text-xs text-brand-400 font-bold animate-pulse">
+                                <div className="w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+                                Subiendo imagen...
                             </div>
                         )}
                     </div>
@@ -171,16 +198,28 @@ export default function ProductModal({
                             />
                         </div>
                         <div>
-                            <label className="block text-xs uppercase tracking-widest text-white/40 font-bold mb-2">Stock Inicial</label>
+                            <label className="block text-xs uppercase tracking-widest text-white/40 font-bold mb-2">Precio (USD $)</label>
                             <input
-                                required
                                 type="number"
-                                placeholder="0"
-                                className="input-field"
-                                value={stock}
-                                onChange={e => setStock(e.target.value)}
+                                step="0.01"
+                                placeholder="0.00"
+                                className="input-field border-brand-500/30"
+                                value={priceUsd}
+                                onChange={e => setPriceUsd(e.target.value)}
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs uppercase tracking-widest text-white/40 font-bold mb-2">Stock Inicial</label>
+                        <input
+                            required
+                            type="number"
+                            placeholder="0"
+                            className="input-field"
+                            value={stock}
+                            onChange={e => setStock(e.target.value)}
+                        />
                     </div>
 
                     <button
@@ -192,7 +231,7 @@ export default function ProductModal({
                         {productToEdit ? 'Guardar Cambios' : 'Crear Producto'}
                     </button>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

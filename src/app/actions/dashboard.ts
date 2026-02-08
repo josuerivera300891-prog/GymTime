@@ -50,9 +50,9 @@ export async function getDashboardStats(paramTenantId?: string) {
                 .gte('created_at', startOfDay)
                 .lte('created_at', endOfDay),
 
-            // Items Sold
+            // Items Sold (Retail products only)
             supabaseAdmin.from('payments')
-                .select('id, payment_items(quantity)')
+                .select('id, payment_items(quantity, product_id)')
                 .eq('tenant_id', tenantId)
                 .gte('created_at', startOfDay),
 
@@ -87,7 +87,10 @@ export async function getDashboardStats(paramTenantId?: string) {
         if (itemsRes.data) {
             for (const payment of itemsRes.data) {
                 if (payment.payment_items) {
-                    productsSold += payment.payment_items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
+                    // Filter to only include items that ARE items from the shop (have product_id)
+                    // and skip items without product_id (which are memberships/renewals)
+                    const storeItems = (payment.payment_items as any[]).filter(item => item.product_id !== null);
+                    productsSold += storeItems.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
                 }
             }
         }

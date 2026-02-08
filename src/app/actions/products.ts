@@ -10,9 +10,12 @@ export async function upsertProduct(formData: FormData) {
         const name = formData.get('name') as string;
         const description = formData.get('description') as string;
         const price = parseFloat(formData.get('price') as string);
+        const priceUsdRaw = formData.get('price_usd') as string;
+        const priceUsd = priceUsdRaw ? parseFloat(priceUsdRaw) : null;
         const stock = parseInt(formData.get('stock') as string) || 0;
-        const imageUrl = formData.get('image_url') as string;
+        const imagesRaw = formData.get('images') as string; // JSON string array
         const tenantIdParam = formData.get('tenant_id') as string;
+        const mainImageUrl = formData.get('image_url') as string;
 
         const { tenantId } = await getAuthorizedTenantId(tenantIdParam);
 
@@ -20,18 +23,26 @@ export async function upsertProduct(formData: FormData) {
             return { success: false, error: 'No autorizado o tenant no especificado.' };
         }
 
+        let images: string[] = [];
+        try {
+            if (imagesRaw) {
+                images = JSON.parse(imagesRaw);
+            }
+        } catch (e) {
+            console.error('Error parsing images array', e);
+        }
+
         const productData: any = {
             tenant_id: tenantId,
             name,
             description,
             price,
+            price_usd: priceUsd,
             stock,
+            images: images && images.length > 0 ? images : (mainImageUrl ? [mainImageUrl] : []),
+            image_url: mainImageUrl || (images && images.length > 0 ? images[0] : null), // Sync main image for backward compatibility
             active: true
         };
-
-        if (imageUrl) {
-            productData.image_url = imageUrl;
-        }
 
         let error;
 
