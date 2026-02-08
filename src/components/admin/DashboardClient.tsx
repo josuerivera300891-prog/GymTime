@@ -174,47 +174,46 @@ export default function DashboardClient({
                 </div>
             </div>
 
-        </div>
-
-                {/* Ranking del Mes Widget */ }
-    <div className="glass-card p-6">
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <span className="text-yellow-500">🏆</span> Ranking del Mes
-        </h3>
-        <div className="space-y-3">
-            {leaderboard && leaderboard.length > 0 ? (
-                leaderboard.map((m: any, i: number) => (
-                    <div key={m.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
-                        <div className="flex items-center gap-3">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${i === 0 ? 'bg-yellow-500 text-black' :
-                                    i === 1 ? 'bg-slate-300 text-black' :
-                                        i === 2 ? 'bg-amber-600 text-white' : 'bg-white/10 text-white/40'
-                                }`}>
-                                {i + 1}
+            {/* Ranking del Mes Widget */}
+            <div className="glass-card p-6">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <span className="text-yellow-500">🏆</span> Ranking del Mes
+                </h3>
+                <div className="space-y-3">
+                    {leaderboard && leaderboard.length > 0 ? (
+                        leaderboard.map((m: any, i: number) => (
+                            <div key={m.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${i === 0 ? 'bg-yellow-500 text-black' :
+                                        i === 1 ? 'bg-slate-300 text-black' :
+                                            i === 2 ? 'bg-amber-600 text-white' : 'bg-white/10 text-white/40'
+                                        }`}>
+                                        {i + 1}
+                                    </div>
+                                    <span className="text-sm font-bold text-white">{m.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-brand-400 font-black text-xs">{m.attendance_count}</span>
+                                    <span className="text-[10px] text-white/20 uppercase font-black">Visitas</span>
+                                </div>
                             </div>
-                            <span className="text-sm font-bold text-white">{m.name}</span>
+                        ))
+                    ) : (
+                        <div className="text-center py-6 text-white/20 text-xs font-bold bg-white/5 rounded-xl border border-dashed border-white/10">
+                            No hay datos de ranking este mes
                         </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-brand-400 font-black text-xs">{m.attendance_count}</span>
-                            <span className="text-[10px] text-white/20 uppercase font-black">Visitas</span>
-                        </div>
-                    </div>
-                ))
-            ) : (
-                <div className="text-center py-6 text-white/20 text-xs font-bold bg-white/5 rounded-xl border border-dashed border-white/10">
-                    No hay datos de ranking este mes
+                    )}
+                    {leaderboard && leaderboard.length > 0 && (
+                        <Link href="/admin/reports/ranking" className="block text-center text-[10px] text-white/30 hover:text-white transition-colors uppercase font-black tracking-widest mt-4">
+                            Ver reporte detallado →
+                        </Link>
+                    )}
                 </div>
-            )}
-            {leaderboard && leaderboard.length > 0 && (
-                <Link href="/admin/reports/ranking" className="block text-center text-[10px] text-white/30 hover:text-white transition-colors uppercase font-black tracking-widest mt-4">
-                    Ver reporte detallado →
-                </Link>
-            )}
+            </div>
         </div>
-    </div>
-            </div >
 
-        {(isShiftModalOpen && !currentShift) && (
+        {
+        (isShiftModalOpen && !currentShift) && (
             <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
                 <form action={handleOpenShift} className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-md space-y-6 shadow-2xl animate-in zoom-in-95">
                     <div className="text-center">
@@ -259,104 +258,104 @@ export default function DashboardClient({
                 </form>
             </div>
         )
-}
+    }
 
-{
-    isCloseModalOpen && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <form action={handleCloseShift} className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-lg space-y-6 shadow-2xl animate-in zoom-in-95">
-                <div className="text-center">
-                    <div className="w-16 h-16 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-red-500/20">🌙</div>
-                    <h2 className="text-2xl font-black text-white">Cerrar Turno</h2>
-                    <p className="text-white/40 text-sm">Conciliación de Caja y Ventas</p>
-                </div>
+    {
+        isCloseModalOpen && (
+            <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <form action={handleCloseShift} className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-lg space-y-6 shadow-2xl animate-in zoom-in-95">
+                    <div className="text-center">
+                        <div className="w-16 h-16 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-red-500/20">🌙</div>
+                        <h2 className="text-2xl font-black text-white">Cerrar Turno</h2>
+                        <p className="text-white/40 text-sm">Conciliación de Caja y Ventas</p>
+                    </div>
 
-                {/* Summary / Expectations */}
-                <div className="bg-white/5 p-4 rounded-xl space-y-2 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-white/50">Caja Chica (Inicio):</span>
-                        <span className="font-mono text-white">{currencySymbol}{startAmount.toFixed(2)}</span>
+                    {/* Summary / Expectations */}
+                    <div className="bg-white/5 p-4 rounded-xl space-y-2 text-sm">
+                        <div className="flex justify-between">
+                            <span className="text-white/50">Caja Chica (Inicio):</span>
+                            <span className="font-mono text-white">{currencySymbol}{startAmount.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <div className="text-xs text-white/30 font-medium uppercase mb-1">Efectivo</div>
+                            <div className="text-xl font-bold">{currencySymbol}{stats.cashRevenue.toFixed(0)}</div>
+                        </div>
+                        <div className="flex justify-between border-b border-white/10 pb-2 mb-2">
+                            <div className="text-xs text-white/30 font-medium uppercase mb-1">Tarjeta</div>
+                            <div className="text-xl font-bold">{currencySymbol}{stats.cardRevenue.toFixed(0)}</div>
+                        </div>
+                        <div className="flex justify-between font-bold text-lg">
+                            <span className="text-white">Total Esperado (Sistema):</span>
+                            <span className="font-mono text-brand-400">{currencySymbol}{expectedTotal.toFixed(2)}</span>
+                        </div>
                     </div>
-                    <div className="flex justify-between">
-                        <div className="text-xs text-white/30 font-medium uppercase mb-1">Efectivo</div>
-                        <div className="text-xl font-bold">{currencySymbol}{stats.cashRevenue.toFixed(0)}</div>
-                    </div>
-                    <div className="flex justify-between border-b border-white/10 pb-2 mb-2">
-                        <div className="text-xs text-white/30 font-medium uppercase mb-1">Tarjeta</div>
-                        <div className="text-xl font-bold">{currencySymbol}{stats.cardRevenue.toFixed(0)}</div>
-                    </div>
-                    <div className="flex justify-between font-bold text-lg">
-                        <span className="text-white">Total Esperado (Sistema):</span>
-                        <span className="font-mono text-brand-400">{currencySymbol}{expectedTotal.toFixed(2)}</span>
-                    </div>
-                </div>
 
-                {/* Inputs */}
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-[10px] uppercase font-bold text-white/50 mb-1">Efectivo en Caja</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 font-bold text-xs">{currencySymbol}</span>
-                                <input
-                                    name="declared_cash"
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    required
-                                    value={declaredCash}
-                                    onChange={(e) => setDeclaredCash(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white focus:border-brand-500 outline-none font-mono font-bold"
-                                />
+                    {/* Inputs */}
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[10px] uppercase font-bold text-white/50 mb-1">Efectivo en Caja</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 font-bold text-xs">{currencySymbol}</span>
+                                    <input
+                                        name="declared_cash"
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        required
+                                        value={declaredCash}
+                                        onChange={(e) => setDeclaredCash(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white focus:border-brand-500 outline-none font-mono font-bold"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] uppercase font-bold text-white/50 mb-1">Vauchers / Tarjeta</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 font-bold text-xs">{currencySymbol}</span>
+                                    <input
+                                        name="declared_card"
+                                        type="number"
+                                        step="0.01"
+                                        placeholder="0.00"
+                                        required
+                                        value={declaredCard}
+                                        onChange={(e) => setDeclaredCard(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white focus:border-brand-500 outline-none font-mono font-bold"
+                                    />
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-[10px] uppercase font-bold text-white/50 mb-1">Vauchers / Tarjeta</label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 font-bold text-xs">{currencySymbol}</span>
-                                <input
-                                    name="declared_card"
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    required
-                                    value={declaredCard}
-                                    onChange={(e) => setDeclaredCard(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white focus:border-brand-500 outline-none font-mono font-bold"
-                                />
+
+                        {/* Live Difference Calculation */}
+                        <div className={`text-center p-3 rounded-xl border ${difference === 0 ? 'bg-green-500/10 border-green-500/30' : difference < 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
+                            <div className="text-xs uppercase font-black opacity-70 mb-1">Diferencia (Sobrante/Faltante)</div>
+                            <div className={`text-2xl font-black font-mono ${difference === 0 ? 'text-green-500' : difference < 0 ? 'text-red-500' : 'text-blue-400'}`}>
+                                {difference > 0 ? '+' : ''}{currencySymbol}{difference.toFixed(2)}
                             </div>
                         </div>
                     </div>
 
-                    {/* Live Difference Calculation */}
-                    <div className={`text-center p-3 rounded-xl border ${difference === 0 ? 'bg-green-500/10 border-green-500/30' : difference < 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
-                        <div className="text-xs uppercase font-black opacity-70 mb-1">Diferencia (Sobrante/Faltante)</div>
-                        <div className={`text-2xl font-black font-mono ${difference === 0 ? 'text-green-500' : difference < 0 ? 'text-red-500' : 'text-blue-400'}`}>
-                            {difference > 0 ? '+' : ''}{currencySymbol}{difference.toFixed(2)}
-                        </div>
+                    <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={() => setIsCloseModalOpen(false)}
+                            className="flex-1 py-4 text-white/50 hover:text-white font-bold transition-colors"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex-1 py-4 bg-red-500 hover:bg-red-400 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                        >
+                            {isSubmitting ? 'Cerrando...' : 'Confirmar Cierre'}
+                        </button>
                     </div>
-                </div>
-
-                <div className="flex gap-4">
-                    <button
-                        type="button"
-                        onClick={() => setIsCloseModalOpen(false)}
-                        className="flex-1 py-4 text-white/50 hover:text-white font-bold transition-colors"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="flex-1 py-4 bg-red-500 hover:bg-red-400 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
-                    >
-                        {isSubmitting ? 'Cerrando...' : 'Confirmar Cierre'}
-                    </button>
-                </div>
-            </form>
-        </div>
-    )
-}
+                </form>
+            </div>
+        )
+    }
         </div >
     );
 }
