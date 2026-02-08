@@ -62,17 +62,27 @@ export const PWAMemberSummary: React.FC<PWAMemberSummaryProps> = ({ member, prim
                 <div className="flex-1 min-w-0">
                     <div className="text-[10px] text-white/30 uppercase font-black tracking-widest mb-1">Miembro</div>
                     <h1 className="text-xl font-black text-white tracking-tight leading-tight truncate">{member.name}</h1>
-                    <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-2 mt-2">
+                        <div
+                            className="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest border"
+                            style={{
+                                borderColor: `${primaryColor}40`,
+                                color: primaryColor,
+                                background: `${primaryColor}10`
+                            }}
+                        >
+                            {member.level || 'NOVATO'}
+                        </div>
                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${member.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                             {member.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                         </span>
-                        <span className="text-[10px] text-white/30 font-bold">
-                            {member.memberships?.[0]?.next_due_date
-                                ? `Vence ${new Date(member.memberships[0].next_due_date).toLocaleDateString()}`
-                                : 'Sin membresía activa'
-                            }
-                        </span>
                     </div>
+                    <span className="text-[10px] text-white/30 font-bold">
+                        {member.memberships?.[0]?.next_due_date
+                            ? `Vence ${new Date(member.memberships[0].next_due_date).toLocaleDateString()}`
+                            : 'Sin membresía activa'
+                        }
+                    </span>
                 </div>
             </div>
         </div>

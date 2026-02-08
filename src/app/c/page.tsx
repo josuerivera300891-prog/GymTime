@@ -25,6 +25,7 @@ export default function ClientPage() {
         token, member, loading, subscribing, uploading, error, activeTab, setActiveTab,
         products, brightnessBoost, setBrightnessBoost, showNotifModal, setShowNotifModal,
         showInstallBanner, isIOS, deferredPrompt,
+        leaderboard, loadingLeaderboard, fetchLeaderboard,
         handleFileChange, subscribePush, handleInstallClick, dismissInstallBanner, dismissNotifModal, saveRoutine
     } = usePWA();
 
@@ -99,7 +100,9 @@ export default function ClientPage() {
                 {activeTab === 'attendance' && member && (
                     <AttendanceSection
                         member={member}
-                        primaryColor={member.tenant?.primary_color || '#8B5CF6'}
+                        primaryColor={primaryColor}
+                        leaderboard={leaderboard}
+                        loadingLeaderboard={loadingLeaderboard}
                     />
                 )}
 

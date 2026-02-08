@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabaseServer';
 import { isSuperAdminEmail } from '@/lib/auth';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 
 export default async function AdminDashboard({ searchParams }: { searchParams: { tenant_id?: string } }) {
     const tenantIdParam = searchParams?.tenant_id;
@@ -86,9 +85,10 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
         );
     }
 
-    const [statsRes, shift] = await Promise.all([
+    const [statsRes, shift, leaderboardRes] = await Promise.all([
         getDashboardStats(tenantIdParam),
-        getCurrentShift(tenantIdParam)
+        getCurrentShift(tenantIdParam),
+        import('@/app/actions/members').then(m => m.getMonthlyLeaderboard(tenantIdParam || ''))
     ]);
 
     if (statsRes.error || !statsRes.tenantId) {
@@ -115,6 +115,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: {
                 currencySymbol={statsRes.currencySymbol || 'Q'}
                 gymName={statsRes.gymName}
                 isSuperAdmin={isSuperAdmin}
+                leaderboard={leaderboardRes.success ? leaderboardRes.top10 : []}
             />
         </div>
     );

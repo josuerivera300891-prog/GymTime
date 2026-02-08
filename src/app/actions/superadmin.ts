@@ -377,3 +377,52 @@ export async function sendTestWhatsApp(data: {
         };
     }
 }
+
+/**
+ * Fetch health data for the system monitoring
+ */
+export async function getSystemHealth() {
+    if (!await isUserSuperAdmin()) {
+        throw new Error('No autorizado');
+    }
+
+    // 1. Recent WhatsApp Errors (Last 10 failures)
+    const { data: recentErrors } = await supabaseAdmin
+        .from('whatsapp_outbox')
+        .select(`
+            *,
+            tenants(name)
+        `)
+        .eq('status', 'FAILED')
+        .order('sent_at', { ascending: false })
+        .limit(10);
+
+    // 2. Twilio Account Statuses
+    const { data: twilioAccounts } = await supabaseAdmin
+        .from('twilio_accounts')
+        .select(`
+            *,
+            tenants(name)
+        `)
+        .order('status');
+
+    // 3. System Metrics
+    const { count: pendingPush } = await supabaseAdmin
+        .from('push_outbox')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'PENDING');
+
+    const { count: pendingWhatsApp } = await supabaseAdmin
+        .from('whatsapp_outbox')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'PENDING');
+
+    return {
+        recentErrors: recentErrors || [],
+        twilioAccounts: twilioAccounts || [],
+        pendingQueues: {
+            push: pendingPush || 0,
+            whatsapp: pendingWhatsApp || 0
+        }
+    };
+}

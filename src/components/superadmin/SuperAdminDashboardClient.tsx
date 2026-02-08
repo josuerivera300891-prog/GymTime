@@ -168,16 +168,16 @@ export default function SuperAdminDashboardClient({
 
             {/* Quick Actions Footer */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                <div className="glass-card !p-6 flex items-center gap-5 border-white/5 group hover:border-brand-500/20 transition-all cursor-pointer">
+                <Link href="/superadmin/health" className="glass-card !p-6 flex items-center gap-5 border-white/5 group hover:border-brand-500/20 transition-all cursor-pointer">
                     <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/20 group-hover:text-brand-400 transition-colors">
-                        <Shield size={24} />
+                        <Activity size={24} />
                     </div>
                     <div>
-                        <div className="text-sm font-black text-white uppercase italic">Auditoría de Accesos</div>
-                        <div className="text-xs text-white/40">Ver quién ha entrado al panel hoy.</div>
+                        <div className="text-sm font-black text-white uppercase italic">Salud del Sistema</div>
+                        <div className="text-xs text-white/40">Monitoreo de colas y errores en tiempo real.</div>
                     </div>
                     <ChevronRight className="ml-auto text-white/10 group-hover:text-brand-400 group-hover:translate-x-1 transition-all" size={20} />
-                </div>
+                </Link>
                 <Link href="/superadmin/tenants/new" className="glass-card !p-6 flex items-center gap-5 border-white/5 group hover:border-brand-500/20 transition-all">
                     <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/20 group-hover:text-brand-400 transition-colors">
                         <Plus size={24} />

@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
 import { isSuperAdminEmail, getAuthorizedTenantId } from '@/lib/auth';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 // supabaseAdmin import removed as it should not be used in actions generally, 
 // unless for specific admin tasks that user context can't handle. 
@@ -228,4 +230,67 @@ export async function uploadMemberPhoto(formData: FormData) {
     revalidatePath('/admin/scanner');
 
     return { success: true, url: publicUrl };
+}
+
+export async function getMonthlyLeaderboard(tenantId: string, memberId?: string) {
+    const supabase = await createClient();
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    // 1. Get all attendance records for this month and tenant
+    const { data: attendance, error } = await supabaseAdmin
+        .from('attendance')
+        .select(`
+            member_id,
+            members (name, image_url)
+        `)
+        .eq('tenant_id', tenantId)
+        .gte('checked_in_at', startOfMonth.toISOString());
+
+    if (error) {
+        console.error('Leaderboard Fetch Error:', error);
+        return { success: false, error: 'No se pudo obtener el ranking' };
+    }
+
+    // 2. Aggregate by member
+    const counts: Record<string, { name: string, image_url: string, count: number, id: string }> = {};
+
+    attendance.forEach((record: any) => {
+        const id = record.member_id;
+        if (!counts[id]) {
+            counts[id] = {
+                id,
+                name: record.members.name,
+                image_url: record.members.image_url,
+                count: 0
+            };
+        }
+        counts[id].count++;
+    });
+
+    // 3. Sort and get Top 10
+    const sorted = Object.values(counts).sort((a, b) => b.count - a.count);
+    const top10 = sorted.slice(0, 10);
+
+    // 4. Find member position if requested
+    let myPosition = null;
+    if (memberId) {
+        const index = sorted.findIndex(m => m.id === memberId);
+        if (index !== -1) {
+            myPosition = {
+                rank: index + 1,
+                count: sorted[index].count,
+                total: sorted.length
+            };
+        }
+    }
+
+    return {
+        success: true,
+        top10,
+        myPosition,
+        monthName: format(new Date(), 'MMMM', { locale: es })
+    };
 }

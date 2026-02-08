@@ -49,6 +49,8 @@ export async function sendWhatsAppMessage({ tenant_id, phone, body, contentSid, 
         if (contentSid) {
             messagePayload.contentSid = contentSid;
             if (contentVariables) {
+                // Twilio contentVariables MUST be a stringified object of indexed strings
+                // For example: {"1":"John", "2":"GymTime"}
                 messagePayload.contentVariables = JSON.stringify(contentVariables);
             }
         } else if (body) {
@@ -57,6 +59,7 @@ export async function sendWhatsAppMessage({ tenant_id, phone, body, contentSid, 
             throw new Error('Debe proporcionar un body o un contentSid');
         }
 
+        console.log('[WhatsApp] Sending with payload:', { ...messagePayload, auth_token: '***' });
         const response = await client.messages.create(messagePayload);
 
         // 5. Log in outbox for audit

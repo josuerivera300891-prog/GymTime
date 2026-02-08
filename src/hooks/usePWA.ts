@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { uploadMemberPhoto } from '@/app/actions/members';
 
-export type PWATab = 'home' | 'attendance' | 'carnet' | 'store' | 'profile';
+export type PWATab = 'home' | 'attendance' | 'carnet' | 'store' | 'profile' | 'ranking';
 
 export function usePWA() {
     const searchParams = useSearchParams();
@@ -17,6 +17,8 @@ export function usePWA() {
     const [activeTab, setActiveTab] = useState<PWATab>('home');
     const [products, setProducts] = useState<any[]>([]);
     const [brightnessBoost, setBrightnessBoost] = useState(false);
+    const [leaderboard, setLeaderboard] = useState<any>(null);
+    const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
     // --- NOTIFICATION & INSTALL STATES ---
     const [showNotifModal, setShowNotifModal] = useState(false);
@@ -111,7 +113,51 @@ export function usePWA() {
                 const visitsThisWeek = visits.filter((v: any) => new Date(v.checked_in_at) >= startOfWeek).length;
                 const visitsThisMonth = visits.filter((v: any) => new Date(v.checked_in_at) >= startOfMonth).length;
 
-                setMember({ ...memberData, visitsThisWeek, visitsThisMonth });
+                // --- CALCULAR RACHA (STREAK) ---
+                const attendanceDates = [...new Set(visits.map((v: any) =>
+                    new Date(v.checked_in_at).toDateString()
+                ))].map(d => new Date(d)).sort((a, b) => b.getTime() - a.getTime());
+
+                let streak = 0;
+                if (attendanceDates.length > 0) {
+                    const todayStr = new Date().toDateString();
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayStr = yesterday.toDateString();
+
+                    const firstVisit = attendanceDates[0].toDateString();
+
+                    // Solo hay racha si visitó hoy o ayer
+                    if (firstVisit === todayStr || firstVisit === yesterdayStr) {
+                        streak = 1;
+                        for (let i = 0; i < attendanceDates.length - 1; i++) {
+                            const current = attendanceDates[i];
+                            const next = attendanceDates[i + 1];
+                            const diff = (current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24);
+
+                            if (Math.round(diff) === 1) {
+                                streak++;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // --- DETERMINAR NIVEL ---
+                let level = "NOVATO";
+                if (visitsThisMonth >= 20) level = "LEYENDA";
+                else if (visitsThisMonth >= 12) level = "GUERRERO";
+                else if (visitsThisMonth >= 8) level = "ATLETA";
+                else if (visitsThisMonth >= 4) level = "ENTUSIASTA";
+
+                setMember({
+                    ...memberData,
+                    visitsThisWeek,
+                    visitsThisMonth,
+                    streak,
+                    level
+                });
 
                 const prodResponse = await fetch(`/api/store?tenant_id=${memberData.tenant_id}`);
                 const prodData = await prodResponse.json();
@@ -224,10 +270,33 @@ export function usePWA() {
         sessionStorage.setItem('notif_prompt_dismissed', 'true');
     };
 
+    async function fetchLeaderboard() {
+        if (!member) return;
+        setLoadingLeaderboard(true);
+        try {
+            const { getMonthlyLeaderboard } = await import('@/app/actions/members');
+            const result = await getMonthlyLeaderboard(member.tenant_id, member.id);
+            if (result.success) {
+                setLeaderboard(result);
+            }
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
+        } finally {
+            setLoadingLeaderboard(false);
+        }
+    }
+
+    useEffect(() => {
+        if (activeTab === 'ranking' && !leaderboard && member) {
+            fetchLeaderboard();
+        }
+    }, [activeTab, member]);
+
     return {
         token, member, loading, subscribing, uploading, error, activeTab, setActiveTab,
         products, brightnessBoost, setBrightnessBoost, showNotifModal, setShowNotifModal,
         showInstallBanner, setShowInstallBanner, isIOS, deferredPrompt,
+        leaderboard, loadingLeaderboard, fetchLeaderboard,
         handleFileChange, subscribePush, handleInstallClick, dismissInstallBanner, dismissNotifModal,
         saveRoutine: async (routineData: any) => {
             if (!member) return;
