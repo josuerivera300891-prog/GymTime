@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
             .select(`
                 *,
                 memberships(*),
-                tenants(name, country, currency_symbol, logo_url, primary_color, phone),
+                tenants(name, country, currency_symbol, logo_url, primary_color, secondary_color, cta_color, phone),
                 attendance(*),
                 member_routines(*)
             `)
@@ -31,13 +31,18 @@ export async function GET(request: NextRequest) {
         console.log('[API /api/member] Query result:', { member: member ? 'found' : 'null', error });
 
         if (error) {
-            console.error('[API /api/member] Error fetching member:', error);
-            return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+            console.error('[API /api/member] Database error:', error);
+            // If it's specifically a 'no rows' error, return 404
+            if (error.code === 'PGRST116') {
+                return NextResponse.json({ error: 'Miembro no encontrado' }, { status: 404 });
+            }
+            // Otherwise it's a real DB error (like a missing column)
+            return NextResponse.json({ error: 'Error interno del servidor (Data)' }, { status: 500 });
         }
 
         if (!member) {
             console.log('[API /api/member] No member found with token:', token);
-            return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+            return NextResponse.json({ error: 'Miembro no encontrado' }, { status: 404 });
         }
 
         // Fetch payments separately for the member's memberships

@@ -121,6 +121,7 @@ export async function updateTenant(tenantId: string, data: {
     primary_color?: string;
     secondary_color?: string;
     cta_color?: string;
+    phone?: string;
 }) {
     if (!await isUserSuperAdmin()) {
         return { success: false, error: 'No autorizado: Solo el SuperAdministrador puede modificar gimnasios.' };
@@ -132,6 +133,7 @@ export async function updateTenant(tenantId: string, data: {
     if (data.primary_color) updateData.primary_color = data.primary_color;
     if (data.secondary_color) updateData.secondary_color = data.secondary_color;
     if (data.cta_color) updateData.cta_color = data.cta_color;
+    if (data.phone) updateData.phone = data.phone;
     if (data.country) {
         const config = getCountryConfig(data.country);
         updateData.country = config.name;

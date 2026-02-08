@@ -23,6 +23,7 @@ interface EditTenantFormProps {
         primary_color: string | null;
         secondary_color: string | null;
         cta_color: string | null;
+        phone: string | null;
     };
 }
 
@@ -37,7 +38,8 @@ export default function EditTenantForm({ tenant }: EditTenantFormProps) {
         country: tenant.country,
         primary_color: tenant.primary_color || '#E6007E',
         secondary_color: tenant.secondary_color || '#22C55E',
-        cta_color: tenant.cta_color || '#F97316'
+        cta_color: tenant.cta_color || '#F97316',
+        phone: tenant.phone || '505'
     });
 
     async function handleSubmit(e: React.FormEvent) {
@@ -141,6 +143,21 @@ export default function EditTenantForm({ tenant }: EditTenantFormProps) {
                             <option value="España">🇪🇸 España</option>
                             <option value="Estados Unidos">🇺🇸 Estados Unidos</option>
                         </select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] ml-1">
+                            Teléfono de Negocio (WhatsApp)
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.phone}
+                            onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-brand-500/50 outline-none transition-all"
+                            placeholder="Ej. 50588888888"
+                            required
+                        />
+                        <p className="text-[9px] text-white/20 ml-1">Usado para el botón de compra en la Tienda PWA.</p>
                     </div>
                 </div>
 
