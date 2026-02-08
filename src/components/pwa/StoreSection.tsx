@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface StoreSectionProps {
     products: any[];
@@ -9,6 +9,14 @@ interface StoreSectionProps {
 export const StoreSection: React.FC<StoreSectionProps> = ({ products, member, primaryColor }) => {
     const [selectedProduct, setSelectedProduct] = useState<any>(null);
     const [activeImage, setActiveImage] = useState(0);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Reset scroll when changing product
+    useEffect(() => {
+        if (selectedProduct) {
+            setActiveImage(0);
+        }
+    }, [selectedProduct]);
 
     const handleWhatsAppBuy = (product: any) => {
         const phone = member.tenants?.phone || '505'; // Default or from tenant
@@ -18,8 +26,17 @@ export const StoreSection: React.FC<StoreSectionProps> = ({ products, member, pr
         window.open(waUrl, '_blank');
     };
 
+    const handleScroll = () => {
+        if (scrollRef.current) {
+            const scrollPosition = scrollRef.current.scrollLeft;
+            const width = scrollRef.current.offsetWidth;
+            const newActiveImage = Math.round(scrollPosition / width);
+            setActiveImage(newActiveImage);
+        }
+    };
+
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700 pb-20">
             <div className="flex justify-between items-center mb-2 px-2">
                 <h3 className="text-xl font-black uppercase tracking-tight">Catálogo</h3>
                 <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
@@ -31,10 +48,7 @@ export const StoreSection: React.FC<StoreSectionProps> = ({ products, member, pr
                 {products.map((product) => (
                     <div
                         key={product.id}
-                        onClick={() => {
-                            setSelectedProduct(product);
-                            setActiveImage(0);
-                        }}
+                        onClick={() => setSelectedProduct(product)}
                         className="glass-card !p-0 overflow-hidden flex flex-col group active:scale-[0.98] transition-all cursor-pointer"
                     >
                         <div className="relative aspect-square bg-white/5 flex items-center justify-center overflow-hidden">
@@ -59,8 +73,6 @@ export const StoreSection: React.FC<StoreSectionProps> = ({ products, member, pr
 
                         <div className="p-4 flex-1 flex flex-col">
                             <h4 className="text-sm font-black uppercase tracking-tight line-clamp-1 mb-1">{product.name}</h4>
-                            <p className="text-[9px] text-white/40 italic line-clamp-1 mb-3">{product.description || 'Calidad premium.'}</p>
-
                             <div className="mt-auto">
                                 <div className="text-sm font-black" style={{ color: primaryColor }}>
                                     {member.tenants.currency_symbol}{Number(product.price).toLocaleString()}
@@ -80,105 +92,116 @@ export const StoreSection: React.FC<StoreSectionProps> = ({ products, member, pr
                 <div className="py-20 text-center glass-card">
                     <div className="text-5xl mb-4 opacity-20">🏪</div>
                     <p className="text-white/30 text-xs font-black uppercase tracking-[0.2em]">Tienda cerrada temporalmente</p>
-                    <p className="text-white/20 text-[10px] mt-1 italic tracking-widest">Pronto tendremos novedades para ti.</p>
                 </div>
             )}
 
-            {/* Product Detail Modal */}
+            {/* Product Detail Modal - Full Screen Style */}
             {selectedProduct && (
-                <div className="fixed inset-0 z-[100] flex items-end justify-center animate-in fade-in duration-300">
-                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedProduct(null)} />
-                    <div className="relative w-full max-w-md bg-[#0a0a0a] rounded-t-[40px] border-t border-white/10 p-6 pb-12 animate-in slide-in-from-bottom-full duration-500 overflow-hidden">
-                        {/* Drag Handle */}
-                        <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-8" onClick={() => setSelectedProduct(null)} />
+                <div className="fixed inset-0 z-[100] bg-black flex flex-col animate-in slide-in-from-bottom-10 duration-300">
+                    {/* Header with Close Button */}
+                    <div className="absolute top-0 left-0 right-0 z-20 flex justify-between items-center p-4 bg-gradient-to-b from-black/80 to-transparent">
+                        <button
+                            onClick={() => setSelectedProduct(null)}
+                            className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 active:scale-90 transition-transform"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                        </button>
+                        <div className="px-3 py-1 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-white/80">
+                                Detalle
+                            </span>
+                        </div>
+                        <div className="w-10" /> {/* Spacer */}
+                    </div>
 
-                        {/* Images Carousel */}
-                        <div className="relative mb-6">
-                            <div className="aspect-square rounded-3xl overflow-hidden bg-white/5 border border-white/10">
-                                {selectedProduct.images && selectedProduct.images.length > 0 ? (
-                                    <img
-                                        src={selectedProduct.images[activeImage]}
-                                        className="w-full h-full object-cover animate-in fade-in duration-500"
-                                        alt={selectedProduct.name}
-                                    />
-                                ) : (
-                                    <img src={selectedProduct.image_url} className="w-full h-full object-cover" alt={selectedProduct.name} />
-                                )}
+                    {/* Main Scrollable Content */}
+                    <div className="flex-1 overflow-y-auto pb-32 no-scrollbar">
+                        {/* Hero Image Carousel - 55% Height */}
+                        <div className="relative h-[55vh] w-full bg-[#050505]">
+                            <div
+                                className="w-full h-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar"
+                                ref={scrollRef}
+                                onScroll={handleScroll}
+                            >
+                                {(selectedProduct.images && selectedProduct.images.length > 0 ? selectedProduct.images : [selectedProduct.image_url]).map((img: string, idx: number) => (
+                                    <div key={idx} className="w-full h-full flex-shrink-0 snap-center relative">
+                                        <img
+                                            src={img}
+                                            className="w-full h-full object-contain"
+                                            alt={`${selectedProduct.name} - ${idx + 1}`}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 pointer-events-none" />
+                                    </div>
+                                ))}
                             </div>
 
-                            {/* Image Nav Dots */}
-                            {selectedProduct.images && selectedProduct.images.length > 1 && (
-                                <div className="flex justify-center gap-2 mt-4">
+                            {/* Pagination Dots */}
+                            {(selectedProduct.images?.length > 1) && (
+                                <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-10">
                                     {selectedProduct.images.map((_: any, i: number) => (
-                                        <button
+                                        <div
                                             key={i}
-                                            onClick={() => setActiveImage(i)}
-                                            className={`h-1.5 rounded-full transition-all duration-300 ${i === activeImage ? 'w-8 bg-white' : 'w-2 bg-white/20'}`}
+                                            className={`h-1.5 rounded-full transition-all duration-300 shadow-lg ${i === activeImage ? 'w-6 bg-white' : 'w-1.5 bg-white/30'}`}
                                         />
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        {/* Text Content */}
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-start">
-                                <h2 className="text-2xl font-black uppercase tracking-tight max-w-[60%] leading-tight">
-                                    {selectedProduct.name}
-                                </h2>
-                                <div className="text-right">
-                                    <div className="text-xl font-black" style={{ color: primaryColor }}>
-                                        {member.tenants.currency_symbol}{Number(selectedProduct.price).toLocaleString()}
-                                    </div>
-                                    {selectedProduct.price_usd && (
-                                        <div className="text-xs font-black text-white/40">
-                                            ${Number(selectedProduct.price_usd).toLocaleString()} USD
-                                        </div>
-                                    )}
-                                </div>
+                        {/* Product Info */}
+                        <div className="px-6 -mt-4 relative z-10">
+                            <h1 className="text-3xl font-black uppercase tracking-tight leading-none mb-3 drop-shadow-lg">
+                                {selectedProduct.name}
+                            </h1>
+
+                            <div className="flex items-baseline gap-3 mb-6">
+                                <span className="text-2xl font-black" style={{ color: primaryColor }}>
+                                    {member.tenants.currency_symbol}{Number(selectedProduct.price).toLocaleString()}
+                                </span>
+                                {selectedProduct.price_usd && (
+                                    <span className="text-sm font-bold text-white/50">
+                                        / ${Number(selectedProduct.price_usd).toLocaleString()} USD
+                                    </span>
+                                )}
                             </div>
 
-                            <p className="text-sm text-white/50 leading-relaxed italic">
-                                {selectedProduct.description || 'No hay descripción disponible para este producto. Calidad garantizada por Gym Nica.'}
-                            </p>
-
-                            <div className="flex items-center gap-2 py-2">
-                                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-white/60">
-                                    Stock: {selectedProduct.stock} Unidades
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-2 mb-6">
+                                <span className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-white/70">
+                                    Stock: {selectedProduct.stock}
                                 </span>
-                                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-white/60">
-                                    Premium Quality
+                                <span className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest text-white/70">
+                                    Premium
                                 </span>
                             </div>
 
-                            {/* Action Buttons */}
-                            <div className="pt-4 space-y-3">
-                                <button
-                                    onClick={() => handleWhatsAppBuy(selectedProduct)}
-                                    className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all active:scale-[0.98]"
-                                    style={{ backgroundColor: primaryColor, color: '#000' }}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-                                    Comprar vía WhatsApp
-                                </button>
-                                <button
-                                    onClick={() => setSelectedProduct(null)}
-                                    className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 font-black uppercase tracking-widest text-xs text-white/40 active:scale-[0.98] transition-all"
-                                >
-                                    Volver al catálogo
-                                </button>
+                            {/* Description */}
+                            <div className="bg-white/5 rounded-2xl p-5 border border-white/5 mb-6">
+                                <h3 className="text-xs font-black uppercase tracking-widest text-white/40 mb-3">Descripción</h3>
+                                <p className="text-sm text-white/70 leading-relaxed font-medium">
+                                    {selectedProduct.description || 'Producto de alta calidad seleccionado especialmente para tu entrenamiento.'}
+                                </p>
                             </div>
                         </div>
                     </div>
+
+                    {/* Bottom Action Bar */}
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/95 to-transparent z-30 pb- safe-area-bottom">
+                        <button
+                            onClick={() => handleWhatsAppBuy(selectedProduct)}
+                            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black uppercase tracking-widest text-sm shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            style={{
+                                backgroundColor: primaryColor,
+                                color: '#000000',
+                                boxShadow: `0 10px 30px -10px ${primaryColor}66`
+                            }}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                            Comprar por WhatsApp
+                        </button>
+                    </div>
                 </div>
             )}
-
-            {/* Store Info Footer */}
-            <div className="text-center py-4">
-                <p className="text-[9px] text-white/20 uppercase font-black tracking-[0.2em] max-w-[200px] mx-auto italic">
-                    * Compra directamente en recepción mostrando tu código QR
-                </p>
-            </div>
         </div>
     );
 };
