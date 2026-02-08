@@ -210,152 +210,146 @@ export default function DashboardClient({
                     )}
                 </div>
             </div>
-        </div>
 
-        {
-        (isShiftModalOpen && !currentShift) && (
-            <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                <form action={handleOpenShift} className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-md space-y-6 shadow-2xl animate-in zoom-in-95">
-                    <div className="text-center">
-                        <div className="w-16 h-16 bg-brand-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-brand-500/40">🌤️</div>
-                        <h2 className="text-2xl font-black text-white">Iniciar Turno</h2>
-                        <p className="text-white/40 text-sm">Ingresa tus datos para abrir caja</p>
-                    </div>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-xs uppercase font-bold text-white/50 mb-1">Nombre Colaborador</label>
-                            <input
-                                name="worker_name"
-                                type="text"
-                                placeholder="Ej. Juan Pérez"
-                                required
-                                autoFocus
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-500 outline-none text-lg font-bold"
-                            />
+            {isShiftModalOpen && !currentShift && (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                    <form action={handleOpenShift} className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-md space-y-6 shadow-2xl animate-in zoom-in-95">
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-brand-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-brand-500/40">🌤️</div>
+                            <h2 className="text-2xl font-black text-white">Iniciar Turno</h2>
+                            <p className="text-white/40 text-sm">Ingresa tus datos para abrir caja</p>
                         </div>
-                        <div>
-                            <label className="block text-xs uppercase font-bold text-white/50 mb-1">Caja Chica (Inicio)</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 font-bold">{currencySymbol}</span>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs uppercase font-bold text-white/50 mb-1">Nombre Colaborador</label>
                                 <input
-                                    name="start_amount"
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
+                                    name="worker_name"
+                                    type="text"
+                                    placeholder="Ej. Juan Pérez"
                                     required
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white focus:border-brand-500 outline-none text-lg font-mono font-bold"
+                                    autoFocus
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-500 outline-none text-lg font-bold"
                                 />
                             </div>
-                        </div>
-                    </div>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-4 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-brand-500/20 disabled:opacity-50"
-                    >
-                        {isSubmitting ? 'Abriendo...' : 'Abrir Caja'}
-                    </button>
-                </form>
-            </div>
-        )
-    }
-
-    {
-        isCloseModalOpen && (
-            <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                <form action={handleCloseShift} className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-lg space-y-6 shadow-2xl animate-in zoom-in-95">
-                    <div className="text-center">
-                        <div className="w-16 h-16 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-red-500/20">🌙</div>
-                        <h2 className="text-2xl font-black text-white">Cerrar Turno</h2>
-                        <p className="text-white/40 text-sm">Conciliación de Caja y Ventas</p>
-                    </div>
-
-                    {/* Summary / Expectations */}
-                    <div className="bg-white/5 p-4 rounded-xl space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <span className="text-white/50">Caja Chica (Inicio):</span>
-                            <span className="font-mono text-white">{currencySymbol}{startAmount.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <div className="text-xs text-white/30 font-medium uppercase mb-1">Efectivo</div>
-                            <div className="text-xl font-bold">{currencySymbol}{stats.cashRevenue.toFixed(0)}</div>
-                        </div>
-                        <div className="flex justify-between border-b border-white/10 pb-2 mb-2">
-                            <div className="text-xs text-white/30 font-medium uppercase mb-1">Tarjeta</div>
-                            <div className="text-xl font-bold">{currencySymbol}{stats.cardRevenue.toFixed(0)}</div>
-                        </div>
-                        <div className="flex justify-between font-bold text-lg">
-                            <span className="text-white">Total Esperado (Sistema):</span>
-                            <span className="font-mono text-brand-400">{currencySymbol}{expectedTotal.toFixed(2)}</span>
-                        </div>
-                    </div>
-
-                    {/* Inputs */}
-                    <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-[10px] uppercase font-bold text-white/50 mb-1">Efectivo en Caja</label>
+                                <label className="block text-xs uppercase font-bold text-white/50 mb-1">Caja Chica (Inicio)</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 font-bold text-xs">{currencySymbol}</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 font-bold">{currencySymbol}</span>
                                     <input
-                                        name="declared_cash"
+                                        name="start_amount"
                                         type="number"
                                         step="0.01"
                                         placeholder="0.00"
                                         required
-                                        value={declaredCash}
-                                        onChange={(e) => setDeclaredCash(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white focus:border-brand-500 outline-none font-mono font-bold"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-[10px] uppercase font-bold text-white/50 mb-1">Vauchers / Tarjeta</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 font-bold text-xs">{currencySymbol}</span>
-                                    <input
-                                        name="declared_card"
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        required
-                                        value={declaredCard}
-                                        onChange={(e) => setDeclaredCard(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white focus:border-brand-500 outline-none font-mono font-bold"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-white focus:border-brand-500 outline-none text-lg font-mono font-bold"
                                     />
                                 </div>
                             </div>
                         </div>
-
-                        {/* Live Difference Calculation */}
-                        <div className={`text-center p-3 rounded-xl border ${difference === 0 ? 'bg-green-500/10 border-green-500/30' : difference < 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
-                            <div className="text-xs uppercase font-black opacity-70 mb-1">Diferencia (Sobrante/Faltante)</div>
-                            <div className={`text-2xl font-black font-mono ${difference === 0 ? 'text-green-500' : difference < 0 ? 'text-red-500' : 'text-blue-400'}`}>
-                                {difference > 0 ? '+' : ''}{currencySymbol}{difference.toFixed(2)}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                        <button
-                            type="button"
-                            onClick={() => setIsCloseModalOpen(false)}
-                            className="flex-1 py-4 text-white/50 hover:text-white font-bold transition-colors"
-                        >
-                            Cancelar
-                        </button>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 py-4 bg-red-500 hover:bg-red-400 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                            className="w-full py-4 bg-brand-500 hover:bg-brand-400 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-brand-500/20 disabled:opacity-50"
                         >
-                            {isSubmitting ? 'Cerrando...' : 'Confirmar Cierre'}
+                            {isSubmitting ? 'Abriendo...' : 'Abrir Caja'}
                         </button>
-                    </div>
-                </form>
-            </div>
-        )
-    }
-        </div >
+                    </form>
+                </div>
+
+            {isCloseModalOpen && (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                    <form action={handleCloseShift} className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 w-full max-w-lg space-y-6 shadow-2xl animate-in zoom-in-95">
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-red-500/20">🌙</div>
+                            <h2 className="text-2xl font-black text-white">Cerrar Turno</h2>
+                            <p className="text-white/40 text-sm">Conciliación de Caja y Ventas</p>
+                        </div>
+
+                        {/* Summary / Expectations */}
+                        <div className="bg-white/5 p-4 rounded-xl space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-white/50">Caja Chica (Inicio):</span>
+                                <span className="font-mono text-white">{currencySymbol}{startAmount.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <div className="text-xs text-white/30 font-medium uppercase mb-1">Efectivo</div>
+                                <div className="text-xl font-bold">{currencySymbol}{stats.cashRevenue.toFixed(0)}</div>
+                            </div>
+                            <div className="flex justify-between border-b border-white/10 pb-2 mb-2">
+                                <div className="text-xs text-white/30 font-medium uppercase mb-1">Tarjeta</div>
+                                <div className="text-xl font-bold">{currencySymbol}{stats.cardRevenue.toFixed(0)}</div>
+                            </div>
+                            <div className="flex justify-between font-bold text-lg">
+                                <span className="text-white">Total Esperado (Sistema):</span>
+                                <span className="font-mono text-brand-400">{currencySymbol}{expectedTotal.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        {/* Inputs */}
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] uppercase font-bold text-white/50 mb-1">Efectivo en Caja</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 font-bold text-xs">{currencySymbol}</span>
+                                        <input
+                                            name="declared_cash"
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            required
+                                            value={declaredCash}
+                                            onChange={(e) => setDeclaredCash(e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white focus:border-brand-500 outline-none font-mono font-bold"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] uppercase font-bold text-white/50 mb-1">Vauchers / Tarjeta</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 font-bold text-xs">{currencySymbol}</span>
+                                        <input
+                                            name="declared_card"
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            required
+                                            value={declaredCard}
+                                            onChange={(e) => setDeclaredCard(e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white focus:border-brand-500 outline-none font-mono font-bold"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Live Difference Calculation */}
+                            <div className={`text-center p-3 rounded-xl border ${difference === 0 ? 'bg-green-500/10 border-green-500/30' : difference < 0 ? 'bg-red-500/10 border-red-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}>
+                                <div className="text-xs uppercase font-black opacity-70 mb-1">Diferencia (Sobrante/Faltante)</div>
+                                <div className={`text-2xl font-black font-mono ${difference === 0 ? 'text-green-500' : difference < 0 ? 'text-red-500' : 'text-blue-400'}`}>
+                                    {difference > 0 ? '+' : ''}{currencySymbol}{difference.toFixed(2)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setIsCloseModalOpen(false)}
+                                className="flex-1 py-4 text-white/50 hover:text-white font-bold transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="flex-1 py-4 bg-red-500 hover:bg-red-400 text-white rounded-xl font-black uppercase tracking-widest transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Cerrando...' : 'Confirmar Cierre'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+        </div>
     );
 }
